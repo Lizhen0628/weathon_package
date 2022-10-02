@@ -1,42 +1,23 @@
-# Copyright (c) 2021 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
-
 import re
-import pickle
 
 from zhon.hanzi import punctuation
 from collections import Counter
-from ark_nlp.processor.vocab._vocab import Vocab
+from weathon.nlp.base import BaseVocab
+from typing import Union, List, Set
 
 
-class CharVocab(Vocab):
+class CharVocab(BaseVocab):
 
-    def __init__(
-        self,
-        initial_tokens=None,
-        vocab_size=None,
-        tokenize_mode='zh',
-        edge_num=None,
-        adj_matrix=None,
-        edge_weight=None,
-        window_size=None
-    ):
+    def __init__(self,
+                 initial_tokens: Union[List[str], Set[str]] = None,
+                 vocab_size: int = 0,
+                 tokenize_mode: str = 'zh',
+                 edge_num=None,
+                 adj_matrix=None,
+                 edge_weight=None,
+                 window_size=None):
 
+        super().__init__()
         self.edge_num = edge_num
         self.adj_matrix = adj_matrix
         self.edge_weight = edge_weight
@@ -44,16 +25,9 @@ class CharVocab(Vocab):
 
         self.tokenize_mode = tokenize_mode
 
-        self.id2token = {}
-        self.token2id = {}
-
-        self.pad_token = '<pad>'
-        self.unk_token = '<unk>'
-
         self.vocab_size = vocab_size
 
         self.initial_tokens = self.initial_vocab(initial_tokens) if initial_tokens is not None else []
-        self.vocab_size = 0
 
         self.initial_tokens.insert(0, self.unk_token)
         self.initial_tokens.insert(0, self.pad_token)
@@ -61,18 +35,14 @@ class CharVocab(Vocab):
         for token in self.initial_tokens:
             self.add(token)
 
-    def initial_vocab(self, initial_tokens):
+    def initial_vocab(self, initial_tokens: Union[List[str], Set[str]]) -> List[str]:
         counter = Counter(initial_tokens)
-        if self.vocab_size:
-            vocab_size = self.vocab_size - 2
-        else:
-            vocab_size = len(counter)
+        vocab_size = self.vocab_size - 2 if self.vocab_size else len(counter)
         count_pairs = counter.most_common(vocab_size)
-
         tokens, _ = list(zip(*count_pairs))
         return list(tokens)
 
-    def add(self, token, cnt=1):
+    def add(self, token: str, cnt=1) -> int:
         if token in self.token2id:
             idx = self.token2id[token]
         else:
@@ -80,14 +50,18 @@ class CharVocab(Vocab):
             self.id2token[idx] = token
             self.token2id[token] = idx
             self.vocab_size += 1
-
         return idx
 
-    def convert_to_ids(self, tokens):
-        ids = [self.get_id(term) for term in tokens]
-        return ids
+    def get_id(self, token: str) -> int:
+        return self.token2id[token] if token in self.token2id else self.token2id[self.unk_token]
 
-    def recover_from_ids(self, ids, stop_id=None):
+    def get_token(self, idx: int) -> str:
+        return self.id2token[idx] if idx in self.id2token else self.unk_token
+
+    def convert_tokens_to_ids(self, tokens: List[str]) -> List[int]:
+        return [self.get_id(term) for term in tokens]
+
+    def recover_from_ids(self, ids: List[int], stop_id=None) -> List[str]:
         tokens = []
         for i in ids:
             tokens += [self.get_token(i)]
@@ -95,25 +69,7 @@ class CharVocab(Vocab):
                 break
         return tokens
 
-    def recover_id2token(self):
-        id2token_temp = {}
-        for token_iter, idx_iter in self.token2id.items():
-            id2token_temp[idx_iter] = token_iter
-        return id2token_temp
-
-    def get_id(self, token):
-        try:
-            return self.token2id[token]
-        except KeyError:
-            return self.token2id[self.unk_token]
-
-    def get_token(self, idx):
-        try:
-            return self.id2token[idx]
-        except KeyError:
-            return self.unk_token
-
-    def tokenize(self, text, stop_words=None, lower=True):
+    def tokenize(self, text: str, stop_words: Union[List[str], Set[str]] = None, lower: bool = True):
         if self.tokenize_mode == 'zh':
             return CharVocab.zh_tokenize(text, stop_words, lower)
         elif self.tokenize_mode == 'en':
@@ -122,7 +78,7 @@ class CharVocab(Vocab):
             raise ValueError('没有该分词模式')
 
     @classmethod
-    def zh_tokenize(cls, text, stop_words=None, lower=True):
+    def zh_tokenize(cls, text: str, stop_words: Union[List[str], Set[str]] = None, lower: bool = True):
         text = re.sub(r'[%s]+' % punctuation, '', text)
         if lower:
             text = text.lower()
@@ -134,22 +90,10 @@ class CharVocab(Vocab):
         return list(tokens)
 
     @classmethod
-    def en_tokenize(cls, text, stop_words=None, lower=True):
+    def en_tokenize(cls, text: str, stop_words: Union[List[str], Set[str]] = None, lower: bool = True):
         if lower:
             text = text.lower()
-
         tokens = text.split()
-
         if stop_words:
             tokens = filter(lambda w: w not in stop_words, tokens)
-
         return list(tokens)
-
-    def save(self, output_path='./token2id.pkl'):
-        with open(output_path, 'wb') as f:
-            pickle.dump(self.token2id, f)
-
-    def load(self, save_path='./token2id.pkl'):
-        with open(save_path, 'rb') as f:
-            self.token2id = pickle.load(f)
-        self.id2token = self.recover_id2token()
