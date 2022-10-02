@@ -1,20 +1,9 @@
-# Copyright (c) 2020 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
+# -*- coding: utf-8 -*-
+# @Time    : 2022/10/2 13:57
+# @Author  : LiZhen
+# @FileName: dataset.py
+# @github  : https://github.com/Lizhen0628
+# @Description:
 
 import json
 import copy
@@ -39,15 +28,9 @@ class BaseDataset(Dataset):
         is_test (:obj:`bool`, optional, defaults to False): 数据集是否为测试集数据
     """  # noqa: ignore flake8"
 
-    def __init__(
-        self,
-        data,
-        categories=None,
-        is_retain_df=False,
-        is_retain_dataset=False,
-        is_train=True,
-        is_test=False
-    ):
+    def __init__(self, data, categories=None, is_retain_df: bool = False, is_retain_dataset: bool = False,
+                 is_train: bool = True,
+                 is_test: bool = False):
 
         self.is_test = is_test
         self.is_train = is_train
@@ -100,15 +83,9 @@ class BaseDataset(Dataset):
     def _convert_to_dataset(self, data_df):
         pass
 
-    def _read_data(
-        self,
-        data_path,
-        data_format=None,
-        skiprows=-1
-    ):
+    def _read_data(self, data_path, data_format=None, skiprows=-1):
         """
         读取所需数据
-
         Args:
             data_path (:obj:`string`): 数据地址
             data_format (:obj:`string`, defaults to `None`): 数据存储格式
@@ -134,11 +111,7 @@ class BaseDataset(Dataset):
 
         return data_df
 
-    def read_line_json(
-        self,
-        data_path,
-        skiprows=-1
-    ):
+    def read_line_json(self, data_path, skiprows=-1):
         """
         读取所需数据
 
@@ -163,7 +136,6 @@ class BaseDataset(Dataset):
     def convert_to_ids(self, tokenizer):
         """
         将文本转化成id的形式
-
         Args:
             tokenizer: 编码器
         """

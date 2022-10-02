@@ -133,4 +133,3 @@ setup(
         "scikit-learn >= 0.17.0"
     ],
 )
-# python setup.py sdist upload

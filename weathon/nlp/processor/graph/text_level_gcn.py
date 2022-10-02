@@ -1,52 +1,23 @@
-# Copyright (c) 2021 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
-
 import numpy as np
 
 
 class TextLevelGCNGraph(object):
-    def __init__(
-        self,
-        graph='ngram_unweighted',
-        window_size=5
-    ):
+    def __init__(self, graph: str = 'ngram_unweighted', window_size: int = 5):
         self.graph = graph
         self.window_size = window_size
 
-    def build_graph(
-        self,
-        vocab,
-        dataset
-    ):
+    def build_graph(self, vocab, dataset):
         if self.graph == 'ngram_unweighted':
             self.edge_num, self.edges_matrix = self.build_ngram_unweighted_graph(vocab, dataset, self.window_size)
             self.edge_weight = None
         elif self.graph == 'ngram_pmi':
-            self.edge_num, self.edges_matrix, self.edge_weight = self.build_pmi_ngram_graph(vocab, dataset, self.window_size)
+            self.edge_num, self.edges_matrix, self.edge_weight = self.build_pmi_ngram_graph(vocab, dataset,
+                                                                                            self.window_size)
         else:
             raise ValueError('没有该模式的构图')
 
     @staticmethod
-    def build_pmi_ngram_graph(
-        vocab,
-        dataset,
-        window_size=20
-    ):
+    def build_pmi_ngram_graph(vocab, dataset, window_size: int = 20):
         pair_count_matrix = np.zeros((vocab.vocab_size, vocab.vocab_size), dtype=int)
         word_count = np.zeros(vocab.vocab_size, dtype=int)
 
@@ -72,7 +43,8 @@ class TextLevelGCNGraph(object):
 
         for index_ in range(vocab.vocab_size):
             for jndex_ in range(vocab.vocab_size):
-                pmi_matrix[index_, jndex_] = np.log(pair_count_matrix[index_, jndex_] + 1e-8) - np.log(word_count[index_] * word_count[jndex_] + 1e-8)
+                pmi_matrix[index_, jndex_] = np.log(pair_count_matrix[index_, jndex_] + 1e-8) - np.log(
+                    word_count[index_] * word_count[jndex_] + 1e-8)
 
         pmi_matrix = np.nan_to_num(pmi_matrix)
         pmi_matrix = np.maximum(pmi_matrix, 0.0)
@@ -96,18 +68,14 @@ class TextLevelGCNGraph(object):
         return edge_num, adj_matrix, edge_weight
 
     @staticmethod
-    def build_ngram_unweighted_graph(
-        vocab,
-        dataset,
-        ngram=3
-    ):
+    def build_ngram_unweighted_graph(vocab, dataset, ngram: int = 3):
         count = 1
         adj_matrix = np.zeros(shape=(vocab.vocab_size, vocab.vocab_size), dtype=np.int32)
 
         for data_ in dataset.dataset:
             ids_ = vocab.convert_to_ids(vocab.tokenize(data_['text']))
             for src_index_, src_ in enumerate(ids_):
-                for dst_index_ in range(max(0, src_index_-ngram), min(len(ids_), src_index_+ngram+1)):
+                for dst_index_ in range(max(0, src_index_ - ngram), min(len(ids_), src_index_ + ngram + 1)):
                     dst_ = ids_[dst_index_]
                     if adj_matrix[src_, dst_] == 0:
                         adj_matrix[src_, dst_] = count
@@ -121,11 +89,7 @@ class TextLevelGCNGraph(object):
 
         return edge_num, adj_matrix
 
-    def get_sequence_graph(
-        self,
-        sequence,
-        local_token2id
-    ):
+    def get_sequence_graph(self, sequence, local_token2id):
         local_edges = []
         edge_ids = []
         for index_, src_ in enumerate(sequence):

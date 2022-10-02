@@ -1,24 +1,8 @@
-# Copyright (c) 2021 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
-
 import dgl
 
-from ark_nlp.processor.tokenizer._tokenizer import BaseTokenizer
+from weathon.nlp.base import BaseTokenizer, BaseVocab
+from transformers import BertTokenizer, AutoTokenizer
+from typing import Union, List, Set,Tuple
 
 
 class TextLevelGCNTokenizer(BaseTokenizer):
@@ -32,21 +16,16 @@ class TextLevelGCNTokenizer(BaseTokenizer):
 
     """  # noqa: ignore flake8"
 
-    def __init__(
-        self,
-        vocab,
-        max_seq_len,
-        graph
-    ):
-        super(TextLevelGCNTokenizer, self).__init__(max_seq_len, vocab)
+    def __init__(self, vocab: Union[BaseVocab, BertTokenizer, AutoTokenizer], max_seq_len: int, graph):
+        super(TextLevelGCNTokenizer, self).__init__(vocab, max_seq_len)
         self.graph = graph
         self.tokenizer_type = 'graph'
 
-    def sequence_to_graph(self, sequence):
+    def sequence_to_graph(self, sequence:Union[str,List[str]]) -> Tuple[List[int],List[int],dgl.DGLHeteroGraph]:
         if type(sequence) == str:
             sequence = self.tokenize(sequence)
 
-        sequence = self.vocab.convert_to_ids(sequence)
+        sequence = self.vocab.convert_tokens_to_ids(sequence)
         if len(sequence) == 0:
             sequence = [0]
 
