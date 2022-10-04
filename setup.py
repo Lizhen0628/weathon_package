@@ -105,20 +105,20 @@ def find_package_data(
 PACKAGE = "weathon"
 VERSION = __import__(PACKAGE).__version__
 AUTHOR = __import__(PACKAGE).__author__
+EMAIL = __import__(PACKAGE).__email__
 
 setup(
     name="weathon",
     version=VERSION,
-    description="A private nlp coding package",
+    description="A private coding package",
     author=AUTHOR,
-    author_email="16621660628@163.com",
+    author_email=EMAIL,
     url="https://github.com/Lizhen0628",
     packages=find_packages(),
     package_data=find_package_data(PACKAGE, only_in_packages=False),
     classifiers=[
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries",
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
     ],
     zip_safe=False,
@@ -127,9 +127,15 @@ setup(
         "torch >= 1.0.0",
         "tqdm >= 4.27.0",
         "jieba >= 0.42.1",
-        "transformers >= 3.0.0",
         "zhon >= 1.1.5",
+        "seqeval==1.2.2",
+        "paramiko==2.11.0",
+        "Levenshtein==0.20.5",
+        "mmh3==3.0.0",
+        "pandas==1.4.4",
         "scipy >= 1.2.0",
+        "requests==2.28.1",
+        "transformers >= 3.0.0",
         "scikit-learn >= 0.17.0"
     ],
 )
