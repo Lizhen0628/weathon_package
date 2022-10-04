@@ -286,3 +286,11 @@ class FileDecomposeUtils:
         with bz2.BZ2File(source, "rb") as source_reader, target_file.open("wb") as target_writer:
             for data in iter(lambda: source_reader.read(100 * 1024), b""):
                 target_writer.write(data)
+
+    @classmethod
+    def add_start_docstrings(cls,*docstr):
+        def docstring_decorator(fn):
+            fn.__doc__ = "".join(docstr) + (fn.__doc__ if fn.__doc__ is not None else "")
+            return fn
+
+        return docstring_decorator

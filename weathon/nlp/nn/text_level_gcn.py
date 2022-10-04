@@ -1,21 +1,3 @@
-# Copyright (c) 2021 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
-
 import dgl
 import torch
 
@@ -24,18 +6,18 @@ from torch import nn
 
 class TextLevelGCN(torch.nn.Module):
     def __init__(
-        self,
-        vocab_size,
-        node_embed_size,
-        edge_num,
-        class_num=2,
-        pre_node_embed=False,
-        node_embed_vectors=0,
-        is_node_freeze=False,
-        pre_edge_embed=False,
-        edge_embed_vectors=0,
-        is_edge_freeze=False,
-        fc_dropout_rate=0.5
+            self,
+            vocab_size,
+            node_embed_size,
+            edge_num,
+            class_num=2,
+            pre_node_embed=False,
+            node_embed_vectors=0,
+            is_node_freeze=False,
+            pre_edge_embed=False,
+            edge_embed_vectors=0,
+            is_edge_freeze=False,
+            fc_dropout_rate=0.5
     ):
         super(TextLevelGCN, self).__init__()
 
@@ -86,9 +68,9 @@ class TextLevelGCN(torch.nn.Module):
         nn.init.xavier_uniform_(self.classify.weight)
 
     def forward(
-        self,
-        sub_graph,
-        **kwargs
+            self,
+            sub_graph,
+            **kwargs
     ):
         sub_graph.update_all(
             message_func=dgl.function.src_mul_edge('h', 'w', 'weighted_message'),

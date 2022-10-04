@@ -28,12 +28,12 @@ class CRF(nn.Module):
        labeling sequence data". *Proc. 18th International Conf. on Machine
        Learning*. Morgan Kaufmann. pp. 282–289.
     .. _Viterbi algorithm: https://en.wikipedia.org/wiki/Viterbi_algorithm
-    """  # noqa: ignore flake8"
+    """
 
     def __init__(
-        self,
-        num_tags: int,
-        batch_first: bool = False
+            self,
+            num_tags: int,
+            batch_first: bool = False
     ) -> None:
 
         if num_tags <= 0:
@@ -81,6 +81,8 @@ class CRF(nn.Module):
             `~torch.Tensor`: The log likelihood. This will have size ``(batch_size,)`` if
             reduction is ``none``, ``()`` otherwise.
         """
+        # tags_zero = torch.zeros_like(tags)
+        # tags = torch.where(tags > 0, tags, tags_zero)
         if reduction not in ('none', 'sum', 'mean', 'token_mean'):
             raise ValueError(f'invalid reduction: {reduction}')
         if mask is None:
@@ -94,12 +96,9 @@ class CRF(nn.Module):
             tags = tags.transpose(0, 1)
             mask = mask.transpose(0, 1)
 
-        # shape: (batch_size,)
-        numerator = self._compute_score(emissions, tags, mask)
-        # shape: (batch_size,)
-        denominator = self._compute_normalizer(emissions, mask)
-        # shape: (batch_size,)
-        llh = numerator - denominator
+        numerator = self._compute_score(emissions, tags, mask)  # shape: (batch_size,)
+        denominator = self._compute_normalizer(emissions, mask)  # shape: (batch_size,)
+        llh = numerator - denominator  # shape: (batch_size,)
 
         if reduction == 'none':
             return llh
@@ -413,7 +412,7 @@ class CRF(nn.Module):
         best_tags_arr = torch.zeros((seq_length, batch_size, nbest),
                                     dtype=torch.long, device=device)
         best_tags = torch.arange(nbest, dtype=torch.long, device=device) \
-                         .view(1, -1).expand(batch_size, -1)
+            .view(1, -1).expand(batch_size, -1)
         for idx in range(seq_length - 1, -1, -1):
             best_tags = torch.gather(history_idx[idx].view(batch_size, -1), 1, best_tags)
             best_tags_arr[idx] = best_tags.data.view(batch_size, -1) // nbest

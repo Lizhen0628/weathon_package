@@ -1,31 +1,20 @@
-# Copyright (c) 2021 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-# From: https://github.com/lonePatient/NeZha_Chinese_PyTorch
+# -*- coding: utf-8 -*-
+# @Time    : 2022/10/3 17:16
+# @Author  : LiZhen
+# @FileName: nezha_block.py
+# @github  : https://github.com/Lizhen0628
+# @Description:
+# reference:https://github.com/lonePatient/NeZha_Chinese_PyTorch
+
 
 
 import math
-import os
 import logging
 import torch
-
 from torch import nn
 
-from ark_nlp.nn.configuration.configuration_nezha import NeZhaConfig
-from transformers.modeling_utils import PreTrainedModel, prune_linear_layer
+from transformers.modeling_utils import prune_linear_layer
+
 try:
     from transformers.modeling_bert import (
         BertOutput,
@@ -55,84 +44,6 @@ logger = logging.getLogger(__name__)
 
 _CONFIG_FOR_DOC = "NeZhaConfig"
 _TOKENIZER_FOR_DOC = "NeZhaTokenizer"
-
-NEZHA_PRETRAINED_MODEL_ARCHIVE_LIST = []
-NEZHA_PRETRAINED_MODEL_ARCHIVE_MAP = {}
-
-
-def load_tf_weights_in_nezha(model, config, tf_checkpoint_path):
-    """Load tf checkpoints in a pytorch model."""
-    try:
-        import re
-        import numpy as np
-        import tensorflow as tf
-    except ImportError:
-        logger.error(
-            "Loading a TensorFlow model in PyTorch, requires TensorFlow to be installed. Please see "
-            "https://www.tensorflow.org/install/ for installation instructions."
-        )
-        raise
-
-    tf_path = os.path.abspath(tf_checkpoint_path)
-    logger.info("Converting TensorFlow checkpoint from {}".format(tf_path))
-    # Load weights from TF model
-    init_vars = tf.train.list_variables(tf_path)
-    names = []
-    arrays = []
-    for name, shape in init_vars:
-        # logger.info("Loading TF weight {} with shape {}".format(name, shape))
-        array = tf.train.load_variable(tf_path, name)
-        names.append(name)
-        arrays.append(array)
-
-    for name, array in zip(names, arrays):
-        name = name.split("/")
-        # adam_v and adam_m are variables used in AdamWeightDecayOptimizer to calculated m and v
-        # which are not required for using pretrained model
-        if any(
-                n in ["adam_v", "adam_m", "lamb_m", "lamb_v", "AdamWeightDecayOptimizer", "AdamWeightDecayOptimizer_1",
-                      "global_step", "good_steps", "loss_scale", 'bad_steps']
-                for n in name
-        ):
-            logger.info("Skipping {}".format("/".join(name)))
-            continue
-        pointer = model
-        for m_name in name:
-            if re.fullmatch(r"[A-Za-z]+_\d+", m_name):
-                scope_names = re.split(r"_(\d+)", m_name)
-            else:
-                scope_names = [m_name]
-            if scope_names[0] == "kernel" or scope_names[0] == "gamma":
-                pointer = getattr(pointer, "weight")
-            elif scope_names[0] == "output_bias" or scope_names[0] == "beta":
-                pointer = getattr(pointer, "bias")
-            elif scope_names[0] == "output_weights":
-                pointer = getattr(pointer, "weight")
-            elif scope_names[0] == "squad":
-                pointer = getattr(pointer, "classifier")
-            else:
-                try:
-                    pointer = getattr(pointer, scope_names[0])
-                except AttributeError:
-                    logger.info("Skipping {}".format("/".join(name)))
-                    continue
-            if len(scope_names) >= 2:
-                num = int(scope_names[1])
-                pointer = pointer[num]
-        if m_name[-11:] == "_embeddings":
-            pointer = getattr(pointer, "weight")
-        elif m_name == "kernel":
-            array = np.transpose(array)
-        try:
-            assert (
-                    pointer.shape == array.shape
-            ), f"Pointer shape {pointer.shape} and array shape {array.shape} mismatched"
-        except AssertionError as e:
-            e.args += (pointer.shape, array.shape)
-            raise
-        logger.info("Initialize PyTorch weight {}".format(name))
-        pointer.data = torch.from_numpy(array)
-    return model
 
 
 class NeZhaEmbeddings(nn.Module):
@@ -167,29 +78,7 @@ class NeZhaEmbeddings(nn.Module):
         return embeddings
 
 
-def relative_position_encoding(depth, max_length=512, max_relative_position=127):
-    vocab_size = max_relative_position * 2 + 1
-    range_vec = torch.arange(max_length)
-    range_mat = range_vec.repeat(max_length).view(max_length, max_length)
-    distance_mat = range_mat - torch.t(range_mat)
-    distance_mat_clipped = torch.clamp(distance_mat, -max_relative_position, max_relative_position)
-    final_mat = distance_mat_clipped + max_relative_position
 
-    embeddings_table = torch.zeros(vocab_size, depth)
-    position = torch.arange(0, vocab_size, dtype=torch.float).unsqueeze(1)
-    div_term = torch.exp(torch.arange(0, depth, 2).float() * (-math.log(10000.0) / depth))
-    embeddings_table[:, 0::2] = torch.sin(position * div_term)
-    embeddings_table[:, 1::2] = torch.cos(position * div_term)
-    embeddings_table = embeddings_table.unsqueeze(0).transpose(0, 1).squeeze(1)
-
-    flat_relative_positions_matrix = final_mat.view(-1)
-    one_hot_relative_positions_matrix = torch.nn.functional.one_hot(flat_relative_positions_matrix,
-                                                                    num_classes=vocab_size).float()
-    positions_encoding = torch.matmul(one_hot_relative_positions_matrix, embeddings_table)
-    my_shape = list(final_mat.size())
-    my_shape.append(depth)
-    positions_encoding = positions_encoding.view(my_shape)
-    return positions_encoding
 
 
 class NeZhaSelfAttention(nn.Module):
@@ -211,14 +100,38 @@ class NeZhaSelfAttention(nn.Module):
         self.value = nn.Linear(config.hidden_size, self.all_head_size)
         self.dropout = nn.Dropout(config.attention_probs_dropout_prob)
 
-        self.relative_positions_encoding = relative_position_encoding(max_length=config.max_position_embeddings,
-                                                                     depth=self.attention_head_size,
-                                                                     max_relative_position=config.max_relative_position)
+        self.relative_positions_encoding = self.relative_position_encoding(max_length=config.max_position_embeddings,
+                                                                      depth=self.attention_head_size,
+                                                                      max_relative_position=config.max_relative_position)
 
     def transpose_for_scores(self, x):
         new_x_shape = x.size()[:-1] + (self.num_attention_heads, self.attention_head_size)
         x = x.view(*new_x_shape)
         return x.permute(0, 2, 1, 3)
+
+    def relative_position_encoding(self,depth, max_length=512, max_relative_position=127):
+        vocab_size = max_relative_position * 2 + 1
+        range_vec = torch.arange(max_length)
+        range_mat = range_vec.repeat(max_length).view(max_length, max_length)
+        distance_mat = range_mat - torch.t(range_mat)
+        distance_mat_clipped = torch.clamp(distance_mat, -max_relative_position, max_relative_position)
+        final_mat = distance_mat_clipped + max_relative_position
+
+        embeddings_table = torch.zeros(vocab_size, depth)
+        position = torch.arange(0, vocab_size, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, depth, 2).float() * (-math.log(10000.0) / depth))
+        embeddings_table[:, 0::2] = torch.sin(position * div_term)
+        embeddings_table[:, 1::2] = torch.cos(position * div_term)
+        embeddings_table = embeddings_table.unsqueeze(0).transpose(0, 1).squeeze(1)
+
+        flat_relative_positions_matrix = final_mat.view(-1)
+        one_hot_relative_positions_matrix = torch.nn.functional.one_hot(flat_relative_positions_matrix,
+                                                                        num_classes=vocab_size).float()
+        positions_encoding = torch.matmul(one_hot_relative_positions_matrix, embeddings_table)
+        my_shape = list(final_mat.size())
+        my_shape.append(depth)
+        positions_encoding = positions_encoding.view(my_shape)
+        return positions_encoding
 
     def forward(
             self,
@@ -412,25 +325,3 @@ class NeZhaEncoder(nn.Module):
         if self.output_attentions:
             outputs = outputs + (all_attentions,)
         return outputs  # last-layer hidden state, (all hidden states), (all attentions)
-
-
-class NeZhaPreTrainedModel(PreTrainedModel):
-    """ An abstract class to handle weights initialization and
-        a simple interface for downloading and loading pretrained models.
-    """
-    config_class = NeZhaConfig
-    pretrained_model_archive_map = NEZHA_PRETRAINED_MODEL_ARCHIVE_MAP
-    load_tf_weights = load_tf_weights_in_nezha
-    base_model_prefix = "bert"
-
-    def _init_weights(self, module):
-        """ Initialize the weights """
-        if isinstance(module, (nn.Linear, nn.Embedding)):
-            # Slightly different from the TF version which uses truncated_normal for initialization
-            # cf https://github.com/pytorch/pytorch/pull/5617
-            module.weight.data.normal_(mean=0.0, std=self.config.initializer_range)
-        elif isinstance(module, nn.LayerNorm):
-            module.bias.data.zero_()
-            module.weight.data.fill_(1.0)
-        if isinstance(module, nn.Linear) and module.bias is not None:
-            module.bias.data.zero_()
