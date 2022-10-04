@@ -1,6 +1,6 @@
 from transformers import BertModel
-from ark_nlp.nn.base.bert import BertForTokenClassification
-from ark_nlp.nn.layer.global_pointer_block import GlobalPointer, EfficientGlobalPointer
+from weathon.nlp.nn.basic import BertForTokenClassification
+from weathon.nlp.nn.layer import GlobalPointer, EfficientGlobalPointer
 
 
 class GlobalPointerBert(BertForTokenClassification):
@@ -16,10 +16,10 @@ class GlobalPointerBert(BertForTokenClassification):
     """  # noqa: ignore flake8"
 
     def __init__(
-        self,
-        config,
-        encoder_trained=True,
-        head_size=64
+            self,
+            config,
+            encoder_trained=True,
+            head_size=64
     ):
         super(GlobalPointerBert, self).__init__(config)
 
@@ -39,11 +39,11 @@ class GlobalPointerBert(BertForTokenClassification):
         self.init_weights()
 
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        **kwargs
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            **kwargs
     ):
         outputs = self.bert(
             input_ids,
@@ -59,6 +59,7 @@ class GlobalPointerBert(BertForTokenClassification):
 
         return logits
 
+
 class EfficientGlobalPointerBert(BertForTokenClassification):
     """
     EfficientGlobalPointer + Bert 的命名实体模型
@@ -73,10 +74,10 @@ class EfficientGlobalPointerBert(BertForTokenClassification):
     """  # noqa: ignore flake8"
 
     def __init__(
-        self,
-        config,
-        encoder_trained=True,
-        head_size=64
+            self,
+            config,
+            encoder_trained=True,
+            head_size=64
     ):
         super(EfficientGlobalPointerBert, self).__init__(config)
 
@@ -96,11 +97,11 @@ class EfficientGlobalPointerBert(BertForTokenClassification):
         self.init_weights()
 
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        **kwargs
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            **kwargs
     ):
         outputs = self.bert(
             input_ids,

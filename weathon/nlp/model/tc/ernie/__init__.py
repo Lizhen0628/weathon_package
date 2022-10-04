@@ -1,20 +1,22 @@
-from ark_nlp.dataset import SentenceClassificationDataset as Dataset
-from ark_nlp.dataset import SentenceClassificationDataset as ErnieTCDataset
+from weathon.nlp.dataset import SentenceClassificationDataset as Dataset
+from weathon.nlp.dataset import SentenceClassificationDataset as ErnieTCDataset
 
-from ark_nlp.processor.tokenizer.transfomer import SentenceTokenizer as Tokenizer
-from ark_nlp.processor.tokenizer.transfomer import SentenceTokenizer as ErnieTCTokenizer
+from weathon.nlp.processor.tokenizer import SentenceTokenizer as Tokenizer
+from weathon.nlp.processor.tokenizer import SentenceTokenizer as ErnieTCTokenizer
 
-from ark_nlp.nn import ErnieConfig
-from ark_nlp.nn import ErnieConfig as ModuleConfig
+from weathon.nlp.nn import ErnieConfig
+from weathon.nlp.nn import ErnieConfig as ModuleConfig
 
-from ark_nlp.nn import Ernie
-from ark_nlp.nn import Ernie as Module
+from weathon.nlp.nn import Ernie
+from weathon.nlp.nn import Ernie as Module
 
-from ark_nlp.factory.optimizer import get_default_bert_optimizer as get_default_model_optimizer
-from ark_nlp.factory.optimizer import get_default_bert_optimizer as get_default_ernie_optimizer
+from weathon.utils.optimizer_utils import OptimizerUtils
 
-from ark_nlp.factory.task import SequenceClassificationTask as Task
-from ark_nlp.factory.task import SequenceClassificationTask as ErnieTCTask
+get_default_model_optimizer = OptimizerUtils.get_default_bert_optimizer
+get_default_ernie_optimizer = OptimizerUtils.get_default_bert_optimizer
 
-from ark_nlp.factory.predictor import TCPredictor as Predictor
-from ark_nlp.factory.predictor import TCPredictor as ErnieTCPredictor
+from weathon.nlp.task import SequenceClassificationTask as Task
+from weathon.nlp.task import SequenceClassificationTask as ErnieTCTask
+
+from weathon.nlp.predictor import TCPredictor as Predictor
+from weathon.nlp.predictor import TCPredictor as ErnieTCPredictor

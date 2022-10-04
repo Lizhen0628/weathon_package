@@ -1,20 +1,22 @@
-from ark_nlp.dataset import BIONERDataset as Dataset
-from ark_nlp.dataset import BIONERDataset as CrfBertNERDataset
+from weathon.nlp.dataset import BIONERDataset as Dataset
+from weathon.nlp.dataset import BIONERDataset as CrfBertNERDataset
 
-from ark_nlp.processor.tokenizer.transfomer import TokenTokenizer as Tokenizer
-from ark_nlp.processor.tokenizer.transfomer import TokenTokenizer as CrfBertNERTokenizer
+from weathon.nlp.processor.tokenizer import TokenTokenizer as Tokenizer
+from weathon.nlp.processor.tokenizer import TokenTokenizer as CrfBertNERTokenizer
 
-from ark_nlp.nn import BertConfig as CrfBertConfig
-from ark_nlp.nn import BertConfig as ModuleConfig
+from weathon.nlp.nn import BertConfig as CrfBertConfig
+from weathon.nlp.nn import BertConfig as ModuleConfig
 
-from ark_nlp.model.ner.crf_bert.crf_bert import CrfBert
-from ark_nlp.model.ner.crf_bert.crf_bert import CrfBert as Module
+from weathon.nlp.nn import CrfBert
+from weathon.nlp.nn import CrfBert as Module
 
-from ark_nlp.factory.optimizer import get_default_crf_bert_optimizer as get_default_model_optimizer
-from ark_nlp.factory.optimizer import get_default_crf_bert_optimizer as get_default_crf_bert_optimizer
+from weathon.utils.optimizer_utils import OptimizerUtils
 
-from ark_nlp.factory.task import CRFNERTask as Task
-from ark_nlp.factory.task import CRFNERTask as CrfBertNERTask
+get_default_model_optimizer = OptimizerUtils.get_default_bert_optimizer
+get_default_crf_bert_optimizer = OptimizerUtils.get_default_bert_optimizer
 
-from ark_nlp.factory.predictor import CRFNERPredictor as Predictor
-from ark_nlp.factory.predictor import CRFNERPredictor as CrfBertNERPredictor
+from weathon.nlp.task import CRFNERTask as Task
+from weathon.nlp.task import CRFNERTask as CrfBertNERTask
+
+from weathon.nlp.predictor import CRFNERPredictor as Predict
+from weathon.nlp.predictor import CRFNERPredictor as CrfBertNERPredictor

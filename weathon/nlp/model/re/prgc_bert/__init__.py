@@ -1,20 +1,22 @@
-from ark_nlp.model.re.prgc_bert.prgc_relation_extraction_dataset import PRGCREDataset 
-from ark_nlp.model.re.prgc_bert.prgc_relation_extraction_dataset import PRGCREDataset as Dataset
+from weathon.nlp.model.re.prgc_bert.prgc_relation_extraction_dataset import PRGCREDataset
+from weathon.nlp.model.re.prgc_bert.prgc_relation_extraction_dataset import PRGCREDataset as Dataset
 
-from ark_nlp.processor.tokenizer.transfomer import SpanTokenizer as Tokenizer
-from ark_nlp.processor.tokenizer.transfomer import SpanTokenizer as PRGCRETokenizer
+from weathon.nlp.processor.tokenizer import SpanTokenizer as Tokenizer
+from weathon.nlp.processor.tokenizer import SpanTokenizer as PRGCRETokenizer
 
-from ark_nlp.nn import BertConfig as PRGCBertConfig
-from ark_nlp.nn import BertConfig as ModuleConfig
+from weathon.nlp.nn import BertConfig as PRGCBertConfig
+from weathon.nlp.nn import BertConfig as ModuleConfig
 
-from ark_nlp.model.re.prgc_bert.prgc_bert import PRGCBert
-from ark_nlp.model.re.prgc_bert.prgc_bert import PRGCBert as Module
+from weathon.nlp.model.re.prgc_bert.prgc_bert import PRGCBert
+from weathon.nlp.model.re.prgc_bert.prgc_bert import PRGCBert as Module
 
-from ark_nlp.factory.optimizer import get_default_bert_optimizer as get_default_model_optimizer
-from ark_nlp.factory.optimizer import get_default_bert_optimizer as get_default_prgc_bert_optimizer
+from weathon.utils.optimizer_utils import OptimizerUtils
 
-from ark_nlp.model.re.prgc_bert.prgc_relation_extraction_task import PRGCRETask as Task
-from ark_nlp.model.re.prgc_bert.prgc_relation_extraction_task import PRGCRETask as PRGCRETask
+get_default_model_optimizer = OptimizerUtils.get_default_bert_optimizer
+get_default_prgc_bert_optimizer = OptimizerUtils.get_default_bert_optimizer
 
-from ark_nlp.model.re.prgc_bert.prgc_relation_extraction_predictor import PRGCREPredictor as Predictor
-from ark_nlp.model.re.prgc_bert.prgc_relation_extraction_predictor import PRGCREPredictor as PRGCREPredictor
+from weathon.nlp.model.re.prgc_bert.prgc_relation_extraction_task import PRGCRETask as Task
+from weathon.nlp.model.re.prgc_bert.prgc_relation_extraction_task import PRGCRETask as PRGCRETask
+
+from weathon.nlp.model.re.prgc_bert.prgc_relation_extraction_predictor import PRGCREPredictor as Predictor
+from weathon.nlp.model.re.prgc_bert.prgc_relation_extraction_predictor import PRGCREPredictor as PRGCREPredictor

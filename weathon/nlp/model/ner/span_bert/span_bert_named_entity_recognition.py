@@ -1,27 +1,7 @@
-# Copyright (c) 2020 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
-
 import torch
-
-from ark_nlp.factory.utils import conlleval
-from ark_nlp.factory.metric import SpanMetrics
-from ark_nlp.factory.metric import BiaffineSpanMetrics
-from ark_nlp.factory.task.base._token_classification import TokenClassificationTask
+from weathon.utils import conlleval
+from weathon.nlp.factory.metric import SpanMetrics
+from weathon.nlp.task import TokenClassificationTask
 
 
 class SpanNERTask(TokenClassificationTask):
@@ -42,10 +22,10 @@ class SpanNERTask(TokenClassificationTask):
     """  # noqa: ignore flake8"
 
     def _get_train_loss(
-        self,
-        inputs,
-        outputs,
-        **kwargs
+            self,
+            inputs,
+            outputs,
+            **kwargs
     ):
         loss = self._compute_loss(inputs, outputs, **kwargs)
 
@@ -54,10 +34,10 @@ class SpanNERTask(TokenClassificationTask):
         return outputs, loss
 
     def _get_evaluate_loss(
-        self,
-        inputs,
-        outputs,
-        **kwargs
+            self,
+            inputs,
+            outputs,
+            **kwargs
     ):
         loss = self._compute_loss(inputs, outputs, **kwargs)
         self._compute_loss_record(**kwargs)
@@ -65,11 +45,11 @@ class SpanNERTask(TokenClassificationTask):
         return outputs, loss
 
     def _compute_loss(
-        self,
-        inputs,
-        logits,
-        verbose=True,
-        **kwargs
+            self,
+            inputs,
+            logits,
+            verbose=True,
+            **kwargs
     ):
         start_logits = logits[0]
         end_logits = logits[1]
@@ -122,11 +102,11 @@ class SpanNERTask(TokenClassificationTask):
 
         start_score_list = torch.argmax(start_logits, -1).cpu().numpy()
         end_score_list = torch.argmax(end_logits, -1).cpu().numpy()
-        
+
         for index, (start_score, end_score) in enumerate(zip(start_score_list, end_score_list)):
-            start_score = start_score[1:length+1]
-            end_score = end_score[1:length+1] 
-            
+            start_score = start_score[1:length + 1]
+            end_score = end_score[1:length + 1]
+
             S = []
             for i, s_l in enumerate(start_score):
                 if s_l == 0:
@@ -145,12 +125,12 @@ class SpanNERTask(TokenClassificationTask):
         self.evaluate_logs['eval_loss'] += loss.item()
 
     def _on_evaluate_epoch_end(
-        self,
-        validation_data,
-        epoch=1,
-        is_evaluate_print=True,
-        id2cat=None,
-        **kwargs
+            self,
+            validation_data,
+            epoch=1,
+            is_evaluate_print=True,
+            id2cat=None,
+            **kwargs
     ):
 
         if id2cat is None:

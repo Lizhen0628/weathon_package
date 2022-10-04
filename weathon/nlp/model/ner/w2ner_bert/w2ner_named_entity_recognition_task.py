@@ -1,27 +1,8 @@
-# Copyright (c) 2020 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Chenjie Shen, jimme.shen123@gmail.com
-# Status: Active
-
-
 import torch
 
 from collections import Counter
-from torch.utils.data._utils.collate import default_collate
-from ark_nlp.factory.utils import conlleval
-from ark_nlp.factory.task.base._token_classification import TokenClassificationTask
+from weathon.utils import conlleval
+from weathon.nlp.task import TokenClassificationTask
 from torch.utils.data._utils.collate import default_collate
 
 
@@ -29,6 +10,7 @@ def convert_index_to_text(index, type):
     text = "-".join([str(i) for i in index])
     text = text + "-#-{}".format(type)
     return text
+
 
 def decode(outputs, entities, length):
     ent_r, ent_p, ent_c = [], [], []
@@ -137,7 +119,6 @@ class SeqEntityScore(object):
             self.rights.extend([pre_entity for pre_entity in pre_entities if pre_entity in label_entities])
 
 
-
 class W2NERTask(TokenClassificationTask):
     """
     W2NER的Task
@@ -186,11 +167,11 @@ class W2NERTask(TokenClassificationTask):
         return self._train_collate_fn(batch)
 
     def _compute_loss(
-        self,
-        inputs,
-        logits,
-        verbose=True,
-        **kwargs
+            self,
+            inputs,
+            logits,
+            verbose=True,
+            **kwargs
     ):
         active_loss = inputs['grid_mask2d'].view(-1) == 1
         active_logits = logits.reshape(-1, self.class_num)
@@ -234,12 +215,12 @@ class W2NERTask(TokenClassificationTask):
             self.evaluate_logs['eval_loss'] += loss.item()
 
     def _on_evaluate_epoch_end(
-        self,
-        validation_data,
-        epoch=1,
-        is_evaluate_print=True,
-        id2cat=None,
-        **kwargs
+            self,
+            validation_data,
+            epoch=1,
+            is_evaluate_print=True,
+            id2cat=None,
+            **kwargs
     ):
 
         if id2cat is None:

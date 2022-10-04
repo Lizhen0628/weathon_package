@@ -3,8 +3,8 @@ import torch
 
 from torch import nn
 from transformers import BertModel
-from ark_nlp.nn.base.bert import BertForTokenClassification
-from ark_nlp.nn.layer.biaffine_block import Biaffine
+from weathon.nlp.nn.basic import BertForTokenClassification
+from weathon.nlp.nn.layer import Biaffine
 
 
 class BiaffineBert(BertForTokenClassification):

@@ -1,18 +1,20 @@
-from ark_nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_dataset import W2NERDataset as Dataset
+from weathon.nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_dataset import W2NERDataset as Dataset
 
-from ark_nlp.processor.tokenizer.transfomer import TokenTokenizer as Tokenizer
-from ark_nlp.processor.tokenizer.transfomer import TokenTokenizer as W2NERTokenizer
+from weathon.nlp.processor.tokenizer import TokenTokenizer as Tokenizer
+from weathon.nlp.processor.tokenizer import TokenTokenizer as W2NERTokenizer
 
-from ark_nlp.nn import BertConfig as W2NERBertConfig
-from ark_nlp.nn import BertConfig as ModuleConfig
+from weathon.nlp.nn import BertConfig as W2NERBertConfig
+from weathon.nlp.nn import BertConfig as ModuleConfig
 
-from ark_nlp.model.ner.w2ner_bert.w2ner_bert import W2NERBert
-from ark_nlp.model.ner.w2ner_bert.w2ner_bert import W2NERBert as Module
+from weathon.nlp.model.ner.w2ner_bert.w2ner_bert import W2NERBert
+from weathon.nlp.model.ner.w2ner_bert.w2ner_bert import W2NERBert as Module
 
-from ark_nlp.factory.optimizer import get_w2ner_model_optimizer as get_default_model_optimizer
-from ark_nlp.factory.optimizer import get_w2ner_model_optimizer as get_default_w2ner_optimizer
+from weathon.utils.optimizer_utils import OptimizerUtils
+get_default_model_optimizer = OptimizerUtils.get_default_bert_optimizer
+get_default_w2ner_optimizer = OptimizerUtils.get_default_bert_optimizer
 
-from ark_nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_task import W2NERTask as Task
+from weathon.nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_task import W2NERTask as Task
 
-from ark_nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_predictor import W2NERPredictor as Predictor
-from ark_nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_predictor import W2NERPredictor
+from weathon.nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_predictor import W2NERPredictor
+from weathon.nlp.model.ner.w2ner_bert.w2ner_named_entity_recognition_predictor import W2NERPredictor as Predictor
+

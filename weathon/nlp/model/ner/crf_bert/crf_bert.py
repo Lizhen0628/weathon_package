@@ -1,5 +1,5 @@
-from ark_nlp.nn.base.bert import BertForTokenClassification
-from ark_nlp.nn.layer.crf_block import CRF
+from weathon.nlp.nn.basic import BertForTokenClassification
+from weathon.nlp.nn.layer import CRF
 
 
 class CrfBert(BertForTokenClassification):

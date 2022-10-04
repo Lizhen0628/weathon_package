@@ -1,20 +1,22 @@
-from ark_nlp.dataset import SentenceClassificationDataset as Dataset
-from ark_nlp.dataset import SentenceClassificationDataset as BertTCDataset
+from weathon.nlp.dataset import SentenceClassificationDataset as Dataset
+from weathon.nlp.dataset import SentenceClassificationDataset as BertTCDataset
 
-from ark_nlp.processor.tokenizer.transfomer import SentenceTokenizer as Tokenizer
-from ark_nlp.processor.tokenizer.transfomer import SentenceTokenizer as BertTCTokenizer
+from weathon.nlp.processor.tokenizer import SentenceTokenizer as Tokenizer
+from weathon.nlp.processor.tokenizer import SentenceTokenizer as BertTCTokenizer
 
-from ark_nlp.nn import BertConfig
-from ark_nlp.nn import BertConfig as ModuleConfig
+from weathon.nlp.nn import BertConfig
+from weathon.nlp.nn import BertConfig as ModuleConfig
 
-from ark_nlp.nn import Bert
-from ark_nlp.nn import Bert as Module
+from weathon.nlp.nn import Bert
+from weathon.nlp.nn import Bert as Module
 
-from ark_nlp.factory.optimizer import get_default_bert_optimizer as get_default_model_optimizer
-from ark_nlp.factory.optimizer import get_default_bert_optimizer as get_default_bert_optimizer
+from weathon.utils.optimizer_utils import OptimizerUtils
 
-from ark_nlp.factory.task import TCTask as Task
-from ark_nlp.factory.task import TCTask as BertTCTask
+get_default_model_optimizer = OptimizerUtils.get_default_bert_optimizer
+get_default_bert_optimizer = OptimizerUtils.get_default_bert_optimizer
 
-from ark_nlp.factory.predictor import TCPredictor as Predictor
-from ark_nlp.factory.predictor import TCPredictor as BertTCPredictor
+from weathon.nlp.task import TCTask as Task
+from weathon.nlp.task import TCTask as BertTCTask
+
+from weathon.nlp.predictor import TCPredictor as Predictor
+from weathon.nlp.predictor import TCPredictor as BertTCPredictor

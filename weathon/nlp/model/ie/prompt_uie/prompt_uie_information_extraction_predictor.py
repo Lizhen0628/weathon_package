@@ -1,24 +1,5 @@
-# Copyright (c) 2021 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
 import torch
-
-from ark_nlp.model.ie.prompt_uie.utils import get_span
-from ark_nlp.model.ie.prompt_uie.utils import get_bool_ids_greater_than
+from weathon.nlp.model.ie.prompt_uie.utils import get_span, get_bool_ids_greater_than
 
 
 class PromptUIEPredictor(object):
@@ -67,8 +48,8 @@ class PromptUIEPredictor(object):
         }
 
     def predict_one_sample(
-        self,
-        text,
+            self,
+            text,
     ):
         """
         单样本预测

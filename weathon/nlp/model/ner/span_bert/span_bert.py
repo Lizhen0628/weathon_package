@@ -3,9 +3,8 @@ import torch.nn.functional as F
 
 from torch import nn
 from transformers import BertModel
-from ark_nlp.nn.base.bert import BertForTokenClassification
-from ark_nlp.nn.layer.pooler_block import PoolerStartLogits
-from ark_nlp.nn.layer.pooler_block import PoolerEndLogits
+from weathon.nlp.nn.basic import BertForTokenClassification
+from weathon.nlp.nn.layer import PoolerStartLogits, PoolerEndLogits
 
 
 class SpanDependenceBert(BertForTokenClassification):
@@ -18,9 +17,9 @@ class SpanDependenceBert(BertForTokenClassification):
     """  # noqa: ignore flake8"
 
     def __init__(
-        self,
-        config,
-        encoder_trained=True
+            self,
+            config,
+            encoder_trained=True
     ):
         super(SpanDependenceBert, self).__init__(config)
 
@@ -39,11 +38,11 @@ class SpanDependenceBert(BertForTokenClassification):
         self.init_weights()
 
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        **kwargs
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            **kwargs
     ):
         outputs = self.bert(
             input_ids,
@@ -77,12 +76,12 @@ class SpanIndependenceBert(BertForTokenClassification):
     """  # noqa: ignore flake8"
 
     def __init__(
-        self,
-        config,
-        encoder_trained=True,
-        mid_hidden_size=128,
-        mid_dropout_rate=0.1,
-        **kwargs
+            self,
+            config,
+            encoder_trained=True,
+            mid_hidden_size=128,
+            mid_dropout_rate=0.1,
+            **kwargs
     ):
         super(SpanIndependenceBert, self).__init__(config)
 
@@ -116,11 +115,11 @@ class SpanIndependenceBert(BertForTokenClassification):
                     nn.init.zeros_(module.bias)
 
     def forward(
-        self,
-        input_ids=None,
-        attention_mask=None,
-        token_type_ids=None,
-        **kwargs
+            self,
+            input_ids=None,
+            attention_mask=None,
+            token_type_ids=None,
+            **kwargs
     ):
         outputs = self.bert(
             input_ids,

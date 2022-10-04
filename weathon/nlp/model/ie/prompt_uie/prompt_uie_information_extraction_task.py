@@ -1,27 +1,9 @@
-# Copyright (c) 2020 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
 import torch
 import torch.nn.functional as F
 
-from ark_nlp.factory.metric import SpanMetrics
-from ark_nlp.model.ie.prompt_uie.utils import get_span
-from ark_nlp.model.ie.prompt_uie.utils import get_bool_ids_greater_than
-from ark_nlp.factory.task.base._token_classification import TokenClassificationTask
+from weathon.nlp.task import TokenClassificationTask
+from weathon.nlp.factory.metric import SpanMetrics
+from weathon.nlp.model.ie.prompt_uie.utils import get_span, get_bool_ids_greater_than
 
 
 class PromptUIETask(TokenClassificationTask):
@@ -102,13 +84,13 @@ class PromptUIETask(TokenClassificationTask):
         S = []
         start_logits = logits[0]
         end_logits = logits[1]
-        
+
         start_pred = start_logits.cpu().numpy().tolist()
         end_pred = end_logits.cpu().numpy().tolist()
-        
+
         start_score_list = get_bool_ids_greater_than(start_pred)
         end_score_list = get_bool_ids_greater_than(end_pred)
-        
+
         for index, (start_score, end_score) in enumerate(zip(start_score_list, end_score_list)):
             S = get_span(start_score, end_score)
             self.metric.update(true_subject=inputs['label_ids'][index], pred_subject=S)

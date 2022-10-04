@@ -1,26 +1,8 @@
-# Copyright (c) 2020 DataArk Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Xiang Wang, xiangking1995@163.com
-# Status: Active
-
-
 import torch
 import numpy as np
 
 from torch.utils.data import DataLoader
-from ark_nlp.factory.task.base._sequence_classification import SequenceClassificationTask
+from weathon.nlp.task import SequenceClassificationTask
 
 
 def to_tup(triple_list):
@@ -81,7 +63,8 @@ class CasRelRETask(SequenceClassificationTask):
     def casrel_collate_fn(self, batch):
         batch = list(filter(lambda x: x is not None, batch))
         batch.sort(key=lambda x: x[2], reverse=True)
-        token_ids, masks, text_len, sub_heads, sub_tails, sub_head, sub_tail, obj_heads, obj_tails, triples, tokens, token_mapping = zip(*batch)
+        token_ids, masks, text_len, sub_heads, sub_tails, sub_head, sub_tail, obj_heads, obj_tails, triples, tokens, token_mapping = zip(
+            *batch)
         cur_batch = len(batch)
         max_text_len = max(text_len)
         batch_token_ids = torch.LongTensor(cur_batch, max_text_len).zero_()
@@ -116,15 +99,15 @@ class CasRelRETask(SequenceClassificationTask):
                 'token_mapping': token_mapping}
 
     def fit(
-        self,
-        train_data=None,
-        validation_data=None,
-        lr=False,
-        params=None,
-        batch_size=32,
-        epochs=1,
-        gradient_accumulation_steps=1,
-        **kwargs
+            self,
+            train_data=None,
+            validation_data=None,
+            lr=False,
+            params=None,
+            batch_size=32,
+            epochs=1,
+            gradient_accumulation_steps=1,
+            **kwargs
     ):
         self.logs = dict()
 
@@ -163,7 +146,6 @@ class CasRelRETask(SequenceClassificationTask):
 
                 # optimize
                 if (step + 1) % gradient_accumulation_steps == 0:
-
                     # optimize
                     self._on_optimize(inputs, outputs, logits, loss, **kwargs)
 
@@ -194,17 +176,17 @@ class CasRelRETask(SequenceClassificationTask):
         return train_data_prefetcher, inputs
 
     def _get_module_inputs_on_train(
-        self,
-        inputs,
-        **kwargs
+            self,
+            inputs,
+            **kwargs
     ):
         return inputs
 
     def _get_train_loss(
-        self,
-        inputs,
-        outputs,
-        **kwargs
+            self,
+            inputs,
+            outputs,
+            **kwargs
     ):
         # 计算损失
         loss = self._compute_loss(inputs, outputs, **kwargs)
@@ -214,11 +196,11 @@ class CasRelRETask(SequenceClassificationTask):
         return outputs, loss
 
     def _compute_loss(
-        self,
-        inputs,
-        logits,
-        verbose=True,
-        **kwargs
+            self,
+            inputs,
+            logits,
+            verbose=True,
+            **kwargs
     ):
 
         loss = self.loss_function(logits, inputs)
@@ -226,12 +208,12 @@ class CasRelRETask(SequenceClassificationTask):
         return loss
 
     def evaluate(
-        self,
-        validation_data,
-        evaluate_batch_size=1,
-        h_bar=0.5,
-        t_bar=0.5,
-        **kwargs
+            self,
+            validation_data,
+            evaluate_batch_size=1,
+            h_bar=0.5,
+            t_bar=0.5,
+            **kwargs
     ):
         self.evaluate_logs = dict()
 
@@ -259,7 +241,8 @@ class CasRelRETask(SequenceClassificationTask):
                 encoded_text = self.module.bert(token_ids, mask)[0]
 
                 pred_sub_heads, pred_sub_tails = self.module.get_subs(encoded_text)
-                sub_heads, sub_tails = np.where(pred_sub_heads.cpu()[0] > h_bar)[0], np.where(pred_sub_tails.cpu()[0] > t_bar)[0]
+                sub_heads, sub_tails = np.where(pred_sub_heads.cpu()[0] > h_bar)[0], \
+                                       np.where(pred_sub_tails.cpu()[0] > t_bar)[0]
 
                 subjects = []
                 for sub_head in sub_heads:
@@ -267,7 +250,8 @@ class CasRelRETask(SequenceClassificationTask):
                     if len(sub_tail) > 0:
 
                         sub_tail = sub_tail[0]
-                        subject = ''.join([token_mapping[index_] if index_ < len(token_mapping) else '' for index_ in range(sub_head-1, sub_tail)])
+                        subject = ''.join([token_mapping[index_] if index_ < len(token_mapping) else '' for index_ in
+                                           range(sub_head - 1, sub_tail)])
 
                         if subject == '':
                             continue
@@ -292,12 +276,15 @@ class CasRelRETask(SequenceClassificationTask):
                     for subject_idx, subject in enumerate(subjects):
                         sub = subject[0]
 
-                        obj_heads, obj_tails = np.where(pred_obj_heads.cpu()[subject_idx] > h_bar), np.where(pred_obj_tails.cpu()[subject_idx] > t_bar)
+                        obj_heads, obj_tails = np.where(pred_obj_heads.cpu()[subject_idx] > h_bar), np.where(
+                            pred_obj_tails.cpu()[subject_idx] > t_bar)
                         for obj_head, rel_head in zip(*obj_heads):
                             for obj_tail, rel_tail in zip(*obj_tails):
                                 if obj_head <= obj_tail and rel_head == rel_tail:
                                     rel = self.id2cat[int(rel_head)]
-                                    obj = ''.join([token_mapping[index_] if index_ < len(token_mapping) else '' for index_ in range(obj_head-1, obj_tail)])
+                                    obj = ''.join(
+                                        [token_mapping[index_] if index_ < len(token_mapping) else '' for index_ in
+                                         range(obj_head - 1, obj_tail)])
 
                                     triple_list.append((sub, rel, obj))
                                     break
@@ -336,12 +323,12 @@ class CasRelRETask(SequenceClassificationTask):
         return precision, recall, f1_score
 
     def _on_evaluate_begin(
-        self,
-        validation_data,
-        batch_size,
-        shuffle,
-        num_workers=0,
-        **kwargs
+            self,
+            validation_data,
+            batch_size,
+            shuffle,
+            num_workers=0,
+            **kwargs
     ):
 
         evaluate_generator = DataLoader(
