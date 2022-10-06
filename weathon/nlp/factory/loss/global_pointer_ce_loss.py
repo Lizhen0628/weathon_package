@@ -4,6 +4,7 @@ import torch.nn as nn
 
 class GlobalPointerCrossEntropy(nn.Module):
     '''Multi-class Focal loss implementation'''
+
     def __init__(self, ):
         super(GlobalPointerCrossEntropy, self).__init__()
 

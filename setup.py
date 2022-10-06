@@ -132,10 +132,11 @@ setup(
         "paramiko==2.11.0",
         "Levenshtein==0.20.5",
         "mmh3==3.0.0",
-        "pandas==1.4.4",
+        "pandas==1.3.3",
         "scipy >= 1.2.0",
         "requests==2.28.1",
         "transformers >= 3.0.0",
-        "scikit-learn >= 0.17.0"
+        "scikit-learn >= 0.17.0",
+        "pypinyin >= 0.47.1"
     ],
 )

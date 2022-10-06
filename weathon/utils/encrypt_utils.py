@@ -13,8 +13,8 @@ class EncryptUtils:
     加密工具类
     """
 
-    @classmethod
-    def encry_md5(cls, in_str: str, salt: str = "123456") -> str:
+    @staticmethod
+    def encry_md5(in_str: str, salt: str = "123456") -> str:
         """
         输入 字符串，对字符串采用md5算法加密，
         :param in_str:  需要加密的字符串

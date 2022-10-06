@@ -15,8 +15,8 @@ from pathlib import Path
 
 class LabelStudioUtils:
 
-    @classmethod
-    def jsonl2labelstudio_ner(cls, input_file: Path, out_file: Path):
+    @staticmethod
+    def jsonl2labelstudio_ner(input_file: Path, out_file: Path):
         """
         task: 命名实体识别
             将jsonl格式的数据 转化成 label studio标注结果格式
@@ -126,8 +126,8 @@ class LabelStudioUtils:
         </View>
         """)
 
-    @classmethod
-    def labelstudioner2jsonl(cls, input_file: Path, out_file: Path):
+    @staticmethod
+    def labelstudioner2jsonl(input_file: Path, out_file: Path):
         """
         label studio 标注结果转换成 jsonl格式：
         {

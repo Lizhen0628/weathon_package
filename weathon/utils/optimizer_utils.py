@@ -10,8 +10,8 @@ from weathon.nlp.factory.optimizer import all_optimizers_dict
 
 class OptimizerUtils:
 
-    @classmethod
-    def get_optimizer(cls, optimizer, module, lr=False, params=None):
+    @staticmethod
+    def get_optimizer(optimizer, module, lr=False, params=None):
         if params is None:
             params_ = (p for p in module.parameters() if p.requires_grad)
         else:
@@ -33,20 +33,19 @@ class OptimizerUtils:
 
         return optimizer
 
-    @classmethod
-    def get_default_optimizer(cls, module, module_name='bert', **kwargs):
+    @staticmethod
+    def get_default_optimizer(module, module_name='bert', **kwargs):
         module_name = module_name.lower()
 
         if module_name == 'bert':
-            return cls.get_default_bert_optimizer(module, **kwargs)
+            return OptimizerUtils.get_default_bert_optimizer(module, **kwargs)
         elif module_name == 'crf_bert':
-            return cls.get_default_crf_bert_optimizer(module, **kwargs)
+            return OptimizerUtils.get_default_crf_bert_optimizer(module, **kwargs)
         else:
             raise ValueError("The default optimizer does not exist")
 
-    @classmethod
+    @staticmethod
     def get_default_bert_optimizer(
-            cls,
             module,
             lr: float = 3e-5,
             eps: float = 1e-6,
@@ -67,9 +66,8 @@ class OptimizerUtils:
                                                  weight_decay=weight_decay)
         return optimizer
 
-    @classmethod
+    @staticmethod
     def get_default_crf_bert_optimizer(
-            cls,
             module,
             lr: float = 2e-5,
             crf_lr: float = 2e-3,
@@ -102,9 +100,8 @@ class OptimizerUtils:
 
         return optimizer
 
-    @classmethod
+    @staticmethod
     def get_w2ner_model_optimizer(
-            cls,
             dl_module,
             lr: float = 1e-3,
             bert_lr: float = 5e-6,

@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from torch.nn.modules.loss import _WeightedLoss
 
 
+
 class CasRelLoss(_WeightedLoss):
     def __init__(self, weight=None, reduction='mean'):
         super().__init__(weight=weight, reduction=reduction)

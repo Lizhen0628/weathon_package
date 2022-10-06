@@ -1,6 +1,7 @@
 from torch.optim import Optimizer
 
 
+
 class PriorWD(Optimizer):
     def __init__(self, optim, use_prior_wd=False, exclude_last_group=True):
         super(PriorWD, self).__init__(optim.param_groups, optim.defaults)

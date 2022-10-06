@@ -12,7 +12,7 @@ from typing import Set
 
 class IpUtils:
 
-    @classmethod
+    @staticmethod
     def find_server_ipv4(cls, username, password,
                          ip1: int = None, ip2: int = None, ip3: int = None, ip4: int = None,port: int = 22) -> Set:
         ssh = paramiko.SSHClient()

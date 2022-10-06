@@ -13,8 +13,8 @@ import torch
 
 class Seed:
 
-    @classmethod
-    def set_seed(cls, seed=7):
+    @staticmethod
+    def set_seed( seed=7):
         random.seed(seed)
         os.environ['PYTHONHASHSEED'] = str(seed)
         np.random.seed(seed)

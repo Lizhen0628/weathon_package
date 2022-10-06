@@ -23,8 +23,8 @@ class FileUtils:
     文件工具类：
     """
 
-    @classmethod
-    def read_json(cls, infile, encoding='utf8'):
+    @staticmethod
+    def read_json(infile, encoding='utf8'):
         """
             读取json文件
         Args:
@@ -37,8 +37,8 @@ class FileUtils:
         with infile.open('rt', encoding=encoding) as handle:
             return json.load(handle, object_hook=OrderedDict)
 
-    @classmethod
-    def read_jsonl_list(cls, file_path: Union[str, Path], encoding: str = 'utf-8', fields: List[str] = None,
+    @staticmethod
+    def read_jsonl_list(file_path: Union[str, Path], encoding: str = 'utf-8', fields: List[str] = None,
                         dropna: bool = True) -> List[Dict]:
         """
         读取jsonl文件，并以列表的形式返回
@@ -74,8 +74,8 @@ class FileUtils:
                 datas.append(_res)
         return datas
 
-    @classmethod
-    def read_jsonl_generator(cls, file_path: Union[str, Path], encoding: str = 'utf-8', fields: List[str] = None,
+    @staticmethod
+    def read_jsonl_generator(file_path: Union[str, Path], encoding: str = 'utf-8', fields: List[str] = None,
                              dropna: bool = True) -> Generator:
         """
 
@@ -109,8 +109,8 @@ class FileUtils:
                         raise ValueError(f'invalid instance at line number: {idx}')
                 yield idx, _res
 
-    @classmethod
-    def read_yaml(cls, infile, encoding='utf8'):
+    @staticmethod
+    def read_yaml(infile, encoding='utf8'):
         """
         读取yaml格式的文件
         Args:
@@ -124,8 +124,8 @@ class FileUtils:
         with infile.open('r', encoding=encoding) as handle:
             return yaml.load(handle, Loader=yaml.Loader)
 
-    @classmethod
-    def write_yaml(cls, content, infile):
+    @staticmethod
+    def write_yaml( content, infile):
         """
         将文件内容写入yaml文件
         Args:
@@ -138,14 +138,14 @@ class FileUtils:
         with infile.open('w', encoding='utf8') as handle:
             yaml.dump(content, handle, )
 
-    @classmethod
-    def write_json(cls, content, infile):
+    @staticmethod
+    def write_json( content, infile):
         infile = Path(infile)
         with infile.open('wt') as handle:
             json.dump(content, handle, indent=4, sort_keys=False)
 
-    @classmethod
-    def copy_dir(cls, source: Union[Path, str] = None, target: Union[Path, str] = None):
+    @staticmethod
+    def copy_dir(source: Union[Path, str] = None, target: Union[Path, str] = None):
         """
         复制文件夹
         Args:
@@ -163,10 +163,10 @@ class FileUtils:
             if source_file.is_file():
                 target_file.write_bytes(source_file.read_bytes())
             else:
-                cls.copy_dir(source_file, target_file)
+                FileUtils.copy_dir(source_file, target_file)
 
-    @classmethod
-    def ensure_dir(cls, dirname: Union[str, Path]) -> Path:
+    @staticmethod
+    def ensure_dir(dirname: Union[str, Path]) -> Path:
         """
         ensure dir path is exist,if not exist,make it
         Args:
@@ -179,8 +179,8 @@ class FileUtils:
             dirname.mkdir(parents=True, exist_ok=False)
         return dirname
 
-    @classmethod
-    def ensure_file(cls, file_name: Union[str, Path]) -> Path:
+    @staticmethod
+    def ensure_file(file_name: Union[str, Path]) -> Path:
         """
         ensure file is exist,if not exist,make it.
         Args:
@@ -190,13 +190,13 @@ class FileUtils:
 
         """
         file_name = Path(file_name)
-        cls.ensure_dir(file_name.parent)
+        FileUtils.ensure_dir(file_name.parent)
         if not file_name.exists():
             file_name.touch(exist_ok=False)
         return file_name
 
-    @classmethod
-    def get_filepath(cls, filepath):
+    @staticmethod
+    def get_filepath(filepath):
         r"""
         如果filepath为文件夹，
             如果内含多个文件, 返回filepath
@@ -223,8 +223,8 @@ class FileDecomposeUtils:
     文件解压缩工具类
     """
 
-    @classmethod
-    def unzip_file(cls, source: Union[str, Path], target: Union[str, Path] = None) -> None:
+    @staticmethod
+    def unzip_file(source: Union[str, Path], target: Union[str, Path] = None) -> None:
         """
         解压缩zip文件
         Args:
@@ -237,8 +237,8 @@ class FileDecomposeUtils:
             # Extract all the contents of zip file in current directory
             zipObj.extractall(target)
 
-    @classmethod
-    def untar_gz_file(cls, source: Union[str, Path], target: Union[str, Path] = None) -> None:
+    @staticmethod
+    def untar_gz_file(source: Union[str, Path], target: Union[str, Path] = None) -> None:
         """
         解压缩tar.gz 文件
         Args:
@@ -250,8 +250,8 @@ class FileDecomposeUtils:
         with tarfile.open(source, 'r:gz') as tar:
             tar.extractall(target)
 
-    @classmethod
-    def ungzip_file(cls, source: Union[str, Path], target: Union[str, Path] = None,
+    @staticmethod
+    def ungzip_file(source: Union[str, Path], target: Union[str, Path] = None,
                     target_filename: Union[str] = None) -> None:
         """
         解压缩gzip文件
@@ -268,8 +268,8 @@ class FileDecomposeUtils:
             for data in iter(lambda: source_reader.read(100 * 1024), b""):
                 target_writer.write(data)
 
-    @classmethod
-    def unbz2_file(cls, source: Union[str, Path], target: Union[str, Path] = None,
+    @staticmethod
+    def unbz2_file(source: Union[str, Path], target: Union[str, Path] = None,
                    target_filename: Union[str] = None) -> None:
         """
         解压缩gzip文件
@@ -287,8 +287,8 @@ class FileDecomposeUtils:
             for data in iter(lambda: source_reader.read(100 * 1024), b""):
                 target_writer.write(data)
 
-    @classmethod
-    def add_start_docstrings(cls,*docstr):
+    @staticmethod
+    def add_start_docstrings(*docstr):
         def docstring_decorator(fn):
             fn.__doc__ = "".join(docstr) + (fn.__doc__ if fn.__doc__ is not None else "")
             return fn

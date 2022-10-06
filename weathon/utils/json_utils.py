@@ -11,8 +11,8 @@ from typing import Dict
 
 class JsonUtils:
 
-    @classmethod
-    def key_to_int(cls, dic: Dict) -> Dict:
+    @staticmethod
+    def key_to_int(dic: Dict) -> Dict:
         """
         加载json文件时，将 字符串类型 的key转化成 整数类型 的key
         Args:

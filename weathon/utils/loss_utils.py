@@ -12,8 +12,8 @@ from weathon.nlp.factory.loss import all_losses_dict
 
 
 class LossUtils:
-    @classmethod
-    def get_loss(cls, loss):
+    @staticmethod
+    def get_loss(loss):
         """
         加载数据集
 
@@ -28,8 +28,8 @@ class LossUtils:
 
         return loss
 
-    @classmethod
-    def dice_loss(cls, input, target, weight=None):
+    @staticmethod
+    def dice_loss(input, target, weight=None):
         """DiceLoss implemented from 'Dice Loss for Data-imbalanced NLP Tasks'
             Useful in dealing with unbalanced data
 
@@ -44,16 +44,16 @@ class LossUtils:
         dice_loss = dsc_i.mean()
         return dice_loss
 
-    @classmethod
-    def focal_loss(cls, input, target, gamma=2, weight=None, ignore_index=-100):
+    @staticmethod
+    def focal_loss( input, target, gamma=2, weight=None, ignore_index=-100):
         logpt = F.log_softmax(input.transpose(1, 2), dim=1)
         pt = torch.exp(logpt)
         logpt = (1 - pt) ** gamma * logpt
         loss = F.nll_loss(logpt, target, weight, ignore_index=ignore_index)
         return loss
 
-    @classmethod
-    def label_smoothing_ce_loss(cls, output, target, weight=None, epsilon=0.1, reduction='mean', ignore_index=-100):
+    @staticmethod
+    def label_smoothing_ce_loss(output, target, weight=None, epsilon=0.1, reduction='mean', ignore_index=-100):
         n_classes = output.size()[-1]
         if output.ndim == 3:
             log_preds = F.log_softmax(output.transpose(1, 2), dim=1)
@@ -69,36 +69,36 @@ class LossUtils:
         return loss * epsilon / n_classes + (1 - epsilon) * F.nll_loss(log_preds, target, weight=weight,
                                                                        reduction=reduction, ignore_index=ignore_index)
 
-    @classmethod
-    def ce_loss(cls, output, target, weight=None):
+    @staticmethod
+    def ce_loss(output, target, weight=None):
         if output.ndim == 3:  # 多见于序列标注任务
             return F.cross_entropy(output.float().transpose(1, 2), target, weight=weight, ignore_index=-100)
         elif output.ndim == 2:  # 多见于文本分类任务
             return F.cross_entropy(output.float(), target, weight=weight, ignore_index=-100)
 
-    @classmethod
-    def binary_loss(cls, output, target):
+    @staticmethod
+    def binary_loss( output, target):
         return F.binary_cross_entropy_with_logits(output, target.float())
 
-    @classmethod
-    def cosine_similarity_loss(cls, first_vector, second_vector, label):
+    @staticmethod
+    def cosine_similarity_loss(first_vector, second_vector, label):
         return F.mse_loss(nn.Identity()(F.cosine_similarity(first_vector, second_vector)), label.view(-1))
 
-    @classmethod
-    def triple_loss(cls, anchor_vec, pos_vec, neg_vec, triplet_margin=5):
+    @staticmethod
+    def triple_loss(anchor_vec, pos_vec, neg_vec, triplet_margin=5):
         distance_pos = F.pairwise_distance(anchor_vec, pos_vec, p=2)
         distance_neg = F.pairwise_distance(anchor_vec, neg_vec, p=2)
 
         return F.relu(distance_pos - distance_neg + triplet_margin).mean()
 
-    @classmethod
-    def mrc_bce_loss(cls, logits, labels, float_label_mask):
+    @staticmethod
+    def mrc_bce_loss(logits, labels, float_label_mask):
         loss = F.binary_cross_entropy_with_logits(logits, labels, reduction='none')
         loss = (loss * float_label_mask).sum() / float_label_mask.sum()
         return loss
 
-    @classmethod
-    def mrc_dice_loss(cls, logits, labels, float_label_mask, smooth=1e-8, square_denominator=False):
+    @staticmethod
+    def mrc_dice_loss(logits, labels, float_label_mask, smooth=1e-8, square_denominator=False):
         flat_input = logits.view(-1)
         flat_target = labels.view(-1)
         flat_input = torch.sigmoid(flat_input)

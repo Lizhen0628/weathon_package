@@ -13,8 +13,8 @@ from torch.optim.lr_scheduler import LambdaLR
 
 class ScheduleUtils:
 
-    @classmethod
-    def get_constant_schedule(cls, optimizer: Optimizer, last_epoch: int = -1):
+    @staticmethod
+    def get_constant_schedule(optimizer: Optimizer, last_epoch: int = -1):
         """
         Create a schedule with a constant learning rate, using the learning rate set in optimizer.
         Args:
@@ -27,8 +27,8 @@ class ScheduleUtils:
         """
         return LambdaLR(optimizer, lambda _: 1, last_epoch=last_epoch)
 
-    @classmethod
-    def get_constant_schedule_with_warmup(cls, optimizer: Optimizer, num_warmup_steps: int, last_epoch: int = -1):
+    @staticmethod
+    def get_constant_schedule_with_warmup(optimizer: Optimizer, num_warmup_steps: int, last_epoch: int = -1):
         """
         Create a schedule with a constant learning rate preceded by a warmup period during which the learning rate
         increases linearly between 0 and the initial lr set in the optimizer.
@@ -50,9 +50,8 @@ class ScheduleUtils:
 
         return LambdaLR(optimizer, lr_lambda, last_epoch=last_epoch)
 
-    @classmethod
+    @staticmethod
     def get_linear_schedule_with_warmup(
-            cls,
             optimizer,
             num_warmup_steps,
             num_training_steps,
@@ -84,9 +83,8 @@ class ScheduleUtils:
         return LambdaLR(optimizer, lr_lambda, last_epoch)
 
 
-    @classmethod
+    @staticmethod
     def get_cosine_schedule_with_warmup(
-            cls,
             optimizer: Optimizer,
             num_warmup_steps: int,
             num_training_steps: int,
@@ -121,9 +119,8 @@ class ScheduleUtils:
 
         return LambdaLR(optimizer, lr_lambda, last_epoch)
 
-    @classmethod
+    @staticmethod
     def get_cosine_with_hard_restarts_schedule_with_warmup(
-            cls,
             optimizer: Optimizer,
             num_warmup_steps: int,
             num_training_steps: int,
@@ -159,9 +156,8 @@ class ScheduleUtils:
 
         return LambdaLR(optimizer, lr_lambda, last_epoch)
 
-    @classmethod
+    @staticmethod
     def get_polynomial_decay_schedule_with_warmup(
-            cls,
             optimizer,
             num_warmup_steps,
             num_training_steps,

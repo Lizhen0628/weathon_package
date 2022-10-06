@@ -15,8 +15,8 @@ from typing import Union
 
 class NERUtils:
 
-    @classmethod
-    def span_extract_entities(cls, start_pred, end_pred, text):
+    @staticmethod
+    def span_extract_entities(start_pred, end_pred, text):
         """
         用于抽取 span model 所对应的实体
         :param start_pred:
@@ -35,8 +35,8 @@ class NERUtils:
                     break
         return S
 
-    @classmethod
-    def bioes_tag_to_spans(cls, tags, ignore_labels=None):
+    @staticmethod
+    def bioes_tag_to_spans(tags, ignore_labels=None):
         """
         给定一个tags的lis，比如['O', 'B-singer', 'I-singer', 'E-singer', 'O', 'O']。
         返回[('singer', (1, 4))] (左闭右开区间)
@@ -65,8 +65,8 @@ class NERUtils:
                 if span[0] not in ignore_labels
                 ]
 
-    @classmethod
-    def bmeso_tag_to_spans(cls, tags, ignore_labels=None):
+    @staticmethod
+    def bmeso_tag_to_spans(tags, ignore_labels=None):
         """
         给定一个tags的lis，比如['O', 'B-singer', 'M-singer', 'E-singer', 'O', 'O']。
         返回[('singer', (1, 4))] (左闭右开区间)
@@ -92,8 +92,8 @@ class NERUtils:
             prev_bmes_tag = bmes_tag
         return [(span[0], span[1][0], span[1][1]) for span in spans if span[0] not in ignore_labels]
 
-    @classmethod
-    def bmes_tag_to_spans(cls, tags, ignore_labels=None):
+    @staticmethod
+    def bmes_tag_to_spans(tags, ignore_labels=None):
         """
         给定一个tags的lis，比如['S-song', 'B-singer', 'M-singer', 'E-singer', 'S-moive', 'S-actor']。
         返回[('song', (0, 1)), ('singer', (1, 4)), ('moive', (4, 5)), ('actor', (5, 6))] (左闭右开区间)
@@ -121,8 +121,8 @@ class NERUtils:
                 if span[0] not in ignore_labels
                 ]
 
-    @classmethod
-    def bio_tag_to_spans(cls, tags, ignore_labels=None):
+    @staticmethod
+    def bio_tag_to_spans(tags, ignore_labels=None):
         """
         给定一个tags的lis，比如['O', 'B-singer', 'I-singer', 'I-singer', 'O', 'O']。
             返回[('singer', (1, 4))] (左闭右开区间)
@@ -148,8 +148,8 @@ class NERUtils:
             prev_bio_tag = bio_tag
         return [(span[0], span[1][0], span[1][1]) for span in spans if span[0] not in ignore_labels]
 
-    @classmethod
-    def conll2jsonl(cls, infile: Union[str, Path], outfile: Union[str, Path]) -> None:
+    @staticmethod
+    def conll2jsonl(infile: Union[str, Path], outfile: Union[str, Path]) -> None:
         infile = Path(infile)
         outfile = Path(outfile)
         words = []
@@ -175,8 +175,8 @@ class NERUtils:
 
         print('conll --> jsonl : convert done !')
 
-    @classmethod
-    def BIO2BMES(cls, infile: Union[str, Path], outfile: Union[str, Path]) -> None:
+    @staticmethod
+    def BIO2BMES(infile: Union[str, Path], outfile: Union[str, Path]) -> None:
         infile = Path(infile)
         outfile = Path(outfile)
 
@@ -216,8 +216,8 @@ class NERUtils:
 
         print("BOI --> BMES : convert done !")
 
-    @classmethod
-    def text2tags(cls, text: str, labels: list, label2id: dict, label_mode: str, max_length):
+    @staticmethod
+    def text2tags(text: str, labels: list, label2id: dict, label_mode: str, max_length):
         """
         将文本text中的内容，根据labels以及label_mode:["bio","bios","bieos"] 转换成 标注格式
         :param text:
@@ -227,15 +227,15 @@ class NERUtils:
         :return:
         """
         if label_mode.lower() == 'bio':
-            return cls().text2bio(text, labels, label2id, max_length)
+            return NERUtils.text2bio(text, labels, label2id, max_length)
         elif label_mode.lower() == 'bios':
-            return cls().text2bios(text, labels, label2id, max_length)
+            return NERUtils.text2bios(text, labels, label2id, max_length)
         elif label_mode.lower() == 'bioes':
-            return cls().text2bioes(text, labels, label2id, max_length)
+            return NERUtils.text2bioes(text, labels, label2id, max_length)
         else:
             raise Exception("{} not in ['bio','bios','bioes']")
-
-    def text2bio(self, text: str, labels: list, label2id: dict, max_length: int):
+    @staticmethod
+    def text2bio(text: str, labels: list, label2id: dict, max_length: int):
         label_tag = ['O'] * len(text)
         label_ids = [0] * len(text)
 
@@ -263,8 +263,8 @@ class NERUtils:
         label['label_id'] = label_ids[:max_length]
         label['gold_label'] = labels[:max_length]
         return label
-
-    def text2bios(self, text: str, labels: list, label2id: dict, max_length: int):
+    @staticmethod
+    def text2bios(text: str, labels: list, label2id: dict, max_length: int):
         label_tag = ['O'] * len(text)
         label_ids = [0] * len(text)
 
@@ -299,8 +299,8 @@ class NERUtils:
         label['label_id'] = label_ids[:max_length]
         label['gold_label'] = labels[:max_length]
         return label
-
-    def text2bioes(self, text: str, labels: list, label2id: dict, max_length: int):
+    @staticmethod
+    def text2bioes(text: str, labels: list, label2id: dict, max_length: int):
         label_tag = ['O'] * len(text)
         label_ids = [0] * len(text)
 
@@ -343,8 +343,8 @@ class NERUtils:
         return label
 
 
-
-    def get_entity_bio(self, seq, id2label=None):
+    @staticmethod
+    def get_entity_bio(seq, id2label=None):
         """Gets entities from sequence.
         note: BIO
         Args:
@@ -383,8 +383,8 @@ class NERUtils:
                     chunks.append(chunk)
                 chunk = [-1, -1, -1]
         return [[x[1], x[2] + 1, x[0]] for x in chunks]
-
-    def get_entity_bios(self, seq, id2label):
+    @staticmethod
+    def get_entity_bios( seq, id2label):
         """Gets entities from sequence.
         note: BIOS
         Args:
@@ -427,8 +427,8 @@ class NERUtils:
                     chunks.append(chunk)
                 chunk = [-1, -1, -1]
         return [[x[1], x[2] + 1, x[0]] for x in chunks]
-
-    def get_entity_bieos(self, seq, id2label):
+    @staticmethod
+    def get_entity_bieos( seq, id2label):
         """Gets entities from sequence.
         note: BIEOS
         Args:
@@ -476,8 +476,8 @@ class NERUtils:
                 chunk = [-1, -1, -1]
         return [[x[1], x[2] + 1, x[0]] for x in chunks]
 
-    @classmethod
-    def get_entities_from_str(cls, seq, id2label):
+    @staticmethod
+    def get_entities_from_str(seq, id2label):
         tag_set = set()
         for k in id2label.values():
             tag_set.add(k.upper().split('-')[0])
@@ -485,27 +485,27 @@ class NERUtils:
         tags = list(tag_set)
         tags.sort()
         if len(tags) == 3 and ''.join(tags) == 'BIO':
-            return cls().get_entity_bio(seq, id2label)
+            return NERUtils.get_entity_bio(seq, id2label)
         elif len(tags) == 4 and ''.join(tags) == 'BIOS':
-            return cls().get_entity_bios(seq, id2label)
+            return NERUtils.get_entity_bios(seq, id2label)
         elif len(tags) == 5 and ''.join(tags) == 'BEIOS':
-            return cls().get_entity_bieos(seq, id2label)
+            return NERUtils.get_entity_bieos(seq, id2label)
         elif len(tags) == 7:
-            return cls().get_entity_bieos(seq, id2label)
+            return NERUtils.get_entity_bieos(seq, id2label)
         else:
             raise Exception('{}, tags must be in the mode ["bio","bios","bieos"]'.format(tags))
 
-    @classmethod
-    def get_entities(cls, seq, id2label):
+    @staticmethod
+    def get_entities(seq, id2label):
         if isinstance(seq[0], int) or isinstance(seq[0], np.int) or isinstance(seq[0], np.int64):
             seq = [id2label[x] for x in seq]
-        return cls().get_entities_from_str(seq, id2label)
+        return NERUtils.get_entities_from_str(seq, id2label)
 
-    @classmethod
-    def get_entities_batch(cls, seq_batch, length_batch, id2label):
+    @staticmethod
+    def get_entities_batch(seq_batch, length_batch, id2label):
         entities_seqs = []
         for seq, length in zip(seq_batch, length_batch):
-            entities_seqs.append(cls().get_entities(seq[:length], id2label))
+            entities_seqs.append(NERUtils.get_entities(seq[:length], id2label))
         return entities_seqs
 
 

@@ -28,16 +28,16 @@ class GPUUtils:
         self.display_mode = display_mode
         self.display_active = display_active
         self.temperature = temp_gpu
-
-    def safeFloatCast(self, str_number):
+    @staticmethod
+    def safeFloatCast(str_number):
         try:
             number = float(str_number)
         except ValueError:
             number = float('nan')
         return number
 
-    @classmethod
-    def getGPUs(cls):
+    @staticmethod
+    def getGPUs():
         if platform.system() == "Windows":
             # If the platform is Windows and nvidia-smi
             # could not be found from the environment path,
@@ -76,13 +76,13 @@ class GPUUtils:
                 elif i == 1:
                     uuid = vals[i]
                 elif i == 2:
-                    gpu_util = cls.safeFloatCast(vals[i]) / 100
+                    gpu_util = GPUUtils.safeFloatCast(vals[i]) / 100
                 elif i == 3:
-                    mem_total = cls.safeFloatCast(vals[i])
+                    mem_total = GPUUtils.safeFloatCast(vals[i])
                 elif i == 4:
-                    mem_used = cls.safeFloatCast(vals[i])
+                    mem_used = GPUUtils.safeFloatCast(vals[i])
                 elif i == 5:
-                    mem_free = cls.safeFloatCast(vals[i])
+                    mem_free = GPUUtils.safeFloatCast(vals[i])
                 elif i == 6:
                     driver = vals[i]
                 elif i == 7:
@@ -94,10 +94,10 @@ class GPUUtils:
                 elif i == 10:
                     display_mode = vals[i]
                 elif i == 11:
-                    temp_gpu = cls.safeFloatCast(vals[i]);
+                    temp_gpu = GPUUtils.safeFloatCast(vals[i]);
 
             gpus.append(
-                GPU(device_ids, uuid, gpu_util, mem_total, mem_used, mem_free, driver, gpu_name, serial, display_mode,
+                GPUUtils(device_ids, uuid, gpu_util, mem_total, mem_used, mem_free, driver, gpu_name, serial, display_mode,
                     display_active, temp_gpu))
         return gpus  # (deviceIds, gpuUtil, memUtil)
 

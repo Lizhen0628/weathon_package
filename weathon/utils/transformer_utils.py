@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 class TransformerUtils:
 
-    @classmethod
-    def download_from_huggingface(cls, model_name, root_path):
+    @staticmethod
+    def download_from_huggingface(model_name, root_path):
         """
         1. 下载可能会失败，重试即可
         2. 程序会缓存之前下载过的内容
@@ -36,8 +36,8 @@ class TransformerUtils:
         model.save_pretrained(path)
         print(path, 'done.')
 
-    @classmethod
-    def load_tf_weights_in_nezha(cls, model, config, tf_checkpoint_path):
+    @staticmethod
+    def load_tf_weights_in_nezha(model, config, tf_checkpoint_path):
         """Load tf checkpoints in a pytorch model."""
         try:
 
@@ -111,8 +111,8 @@ class TransformerUtils:
             pointer.data = torch.from_numpy(array)
         return model
 
-    @classmethod
-    def load_tf_weights_in_roformer(cls, model, config, tf_checkpoint_path):
+    @staticmethod
+    def load_tf_weights_in_roformer(model, config, tf_checkpoint_path):
         """Load tf checkpoints in a pytorch model."""
         try:
             import tensorflow as tf

@@ -11,8 +11,8 @@ from typing import List
 
 class ModelEnsemble:
 
-    @classmethod
-    def save_avg_model(cls, model_list_path, avg_model_path):
+    @staticmethod
+    def save_avg_model(model_list_path, avg_model_path):
         avg_model = None
         for i, model_path in enumerate(model_list_path):
             model = torch.load(model_path)

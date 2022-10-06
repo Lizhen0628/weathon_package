@@ -6,7 +6,7 @@
 # @Description:
 
 
-__version__ = '0.0.0.4'
+__version__ = '0.0.0.7'
 __author__ = 'LiZhen'
 __email__ = '16621660628@163.com'
 
