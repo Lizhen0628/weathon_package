@@ -5,7 +5,7 @@
 # @github  : https://github.com/Lizhen0628
 # @Description:
 from torch.optim import Optimizer
-from weathon.nlp.factory.optimizer import all_optimizers_dict
+from weathon.nlp.factory.optimizer import all_optimizers_dict, AdamW
 
 
 class OptimizerUtils:
@@ -98,6 +98,42 @@ class OptimizerUtils:
                                                  eps=eps,
                                                  correct_bias=correct_bias)
 
+        return optimizer
+
+    @staticmethod
+    def get_transformer_parameters(model, lr: float = 3e-5, weight_decay: float = 1e-3):
+        no_decay = ["bias", "LayerNorm.weight"]
+        group_parameters = [
+            {"params": [p for n, p in model.bert.name_parameters() if not any(nd in n for nd in no_decay)],
+             "weight_decay": weight_decay, "lr": lr},
+            {"params": [p for n, p in model.bert.name_parameters() if any(nd in n for nd in no_decay)],
+             "weight_decay": 0.0, "lr": lr},
+        ]
+        return group_parameters
+
+    @staticmethod
+    def get_classifier_parameters(model, lr: float = 1e-3, weight_decay: float = 1e-3):
+        no_decay = ["bias", "LayerNorm.weight"]
+        group_parameters = [
+            {"params": [p for n, p in model.classifier.name_parameters() if not any(nd in n for nd in no_decay)],
+             "weight_decay": weight_decay, "lr": lr},
+            {"params": [p for n, p in model.classifier.name_parameters() if any(nd in n for nd in no_decay)],
+             "weight_decay": 0.0, "lr": lr},
+        ]
+        return group_parameters
+
+    @staticmethod
+    def get_tc_transformer_optimizer_adamw(
+            model,
+            transformer_lr: float = 3e-5,
+            classifier_lr: float = 1e-3,
+            weight_decay: float = 1e-3,
+            eps: float = 1e-6
+    ):
+        group_parameters = OptimizerUtils.get_transformer_parameters(model, transformer_lr, weight_decay) + \
+                           OptimizerUtils.get_classifier_parameters(model, classifier_lr, weight_decay)
+
+        optimizer = AdamW(group_parameters, eps=eps)
         return optimizer
 
     @staticmethod

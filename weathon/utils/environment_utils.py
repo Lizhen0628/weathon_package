@@ -1,22 +1,26 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2022/10/3 11:55
+# @Time    : 2022/10/9 21:27
 # @Author  : LiZhen
-# @FileName: seed_utils.py
+# @FileName: environment_utils.py
 # @github  : https://github.com/Lizhen0628
 # @Description:
 
-import random
 import os
-import numpy as np
 import torch
+import random
+import numpy as np
 
 
-class Seed:
+class EnvironmentUtils:
 
     @staticmethod
-    def set_seed( seed=7):
+    def set_environ():
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+    @staticmethod
+    def set_seed(seed: int = 7):
         random.seed(seed)
-        os.environ['PYTHONHASHSEED'] = str(seed)
+        os.environ["PYTHONHASHSEED"] = str(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed)

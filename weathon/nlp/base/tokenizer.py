@@ -18,9 +18,9 @@ class BaseTokenizer(object, metaclass=abc.ABCMeta):
     分词器基类
     """
 
-    def __init__(self, vocab: Union[BaseVocab, BertTokenizer, AutoTokenizer], max_seq_length: int):
+    def __init__(self, vocab: Union[BaseVocab, BertTokenizer, AutoTokenizer], max_seq_len: int):
         self.vocab = vocab
-        self.max_seq_length = max_seq_length
+        self.max_seq_len = max_seq_len
 
     def tokenize(self, text: str) -> List[str]:
         return self.vocab.tokenize(text)

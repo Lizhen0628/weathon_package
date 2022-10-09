@@ -6,7 +6,7 @@
 # @Description:
 
 from weathon.nlp.nn.basic.textcnn import TextCNN
-from weathon.nlp.nn.basic.rnn import RNN
+from weathon.nlp.nn.basic.rnn import RNN, RNNForSequenceClassification, RNNForTokenizerClassification
 from weathon.nlp.nn.basic.bert import Bert, BertForSequenceClassification, BertForTokenClassification
 from weathon.nlp.nn.basic.ernie import Ernie, ErnieForSequenceClassification, ErnieForTokenClassification
 from weathon.nlp.nn.basic.nezha import NeZha, NeZhaForSequenceClassification

@@ -7,8 +7,7 @@
 
 import torch
 from torch.utils.data._utils.collate import default_collate
-from weathon.utils import LossUtils
-from weathon.utils import EMA
+from weathon.utils import EMA, ScheduleUtils
 
 
 class BaseTask(object):
@@ -41,10 +40,11 @@ class BaseTask(object):
             ema_decay=None,
             **kwargs
     ):
+        self.logs = dict()
         self.fit_counter = 0
         self.module = module
         self.optimizer = optimizer
-        self.loss_function = LossUtils.get_loss(loss_function)
+        self.loss_function = loss_function
 
         self.class_num = class_num
         self.scheduler = scheduler
@@ -90,7 +90,11 @@ class BaseTask(object):
         pass
 
     def _on_train_begin_record(self, **kwargs):
-        pass
+        """ 训练开始之前的初始化操作：
+        1. 日志初始化
+        """
+        self.logs['global_step'] = 0
+        self.logs['global_loss'] = 0
 
     def _finish_train_begin_record(self, **kwargs):
         pass
@@ -107,8 +111,19 @@ class BaseTask(object):
     def _prepare_epoch_begin_record(self, **kwargs):
         pass
 
+    def _prepare_scheduler(self, warmup_proportion, epochs, **kwargs):
+        if warmup_proportion:
+            num_training_steps = self.train_generator_length * epochs
+            num_warmup_steps = int(warmup_proportion * num_training_steps)
+            scheduler = ScheduleUtils.get_linear_schedule_with_warmup(self.optimizer,
+                                                                      num_warmup_steps=num_warmup_steps,
+                                                                      num_training_steps=num_training_steps)
+
     def _on_epoch_begin_record(self, **kwargs):
-        pass
+        self.logs['epoch_loss'] = 0
+        # 占位作用，子类仅使用单个指标进行评价，则直接使用该字段即可
+        self.logs['epoch_evaluation'] = 0
+        self.logs['epoch_step'] = 0
 
     def _finish_epoch_begin_record(self, **kwargs):
         pass
@@ -152,7 +167,7 @@ class BaseTask(object):
     def _prepare_backward(self, **kwargs):
         pass
 
-    def _on_backward(self, ):
+    def _on_backward(self, **kwargs):
         pass
 
     def _finish_backward(self, **kwargs):
@@ -272,18 +287,14 @@ class BaseTask(object):
     def _on_evaluate_end_record(self, **kwargs):
         pass
 
-    def _get_module_inputs_on_train(self):
+    def _get_module_inputs_on_train(self, **kwargs):
         pass
 
     def _get_module_label_on_train(self):
         pass
 
-    def _get_module_inputs_on_eval(self):
+    def _get_module_inputs_on_eval(self, **kwargs):
         pass
 
     def _get_module_label_on_eval(self):
         pass
-
-
-
-

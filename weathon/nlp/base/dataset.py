@@ -9,12 +9,14 @@ import json
 import copy
 import codecs
 import pandas as pd
-
+from pathlib import Path
+from typing import Union, List, Set, Dict
 from collections import defaultdict
 from torch.utils.data import Dataset
 from pandas.core.frame import DataFrame
 
 
+# TODO:dataset split
 class BaseDataset(Dataset):
     """
     Dataset基类
@@ -28,33 +30,30 @@ class BaseDataset(Dataset):
         is_test (:obj:`bool`, optional, defaults to False): 数据集是否为测试集数据
     """  # noqa: ignore flake8"
 
-    def __init__(self, data, categories=None, is_retain_df: bool = False, is_retain_dataset: bool = False,
-                 is_train: bool = True,
-                 is_test: bool = False):
+    def __init__(self,
+                 data: Union[DataFrame, str, Path],  # 数据或者数据地址
+                 categories=None,  # 数据类别
+                 is_retain_df: bool = False,  # 是否将DataFrame格式的原始数据复制到属性retain_df中
+                 is_retain_dataset: bool = False,  # 是否将处理成dataset格式的原始数据复制到属性retain_dataset中
+                 is_test: bool = False
+                 ):
 
         self.is_test = is_test
-        self.is_train = is_train
         self.is_retain_df = is_retain_df
         self.is_retain_dataset = is_retain_dataset
 
-        if self.is_test is True:
-            self.is_train = False
-
         if isinstance(data, DataFrame):
             if 'label' in data.columns:
-                data['label'] = data['label'].apply(lambda x: str(x))
+                data.loc[:]['label'] = data.loc[:]['label'].apply(lambda x: str(x))
 
-            if self.is_retain_df:
-                self.df = data
-
+            self.df = data if is_retain_df else None
             self.dataset = self._convert_to_dataset(data)
         else:
             self.dataset = self._load_dataset(data)
 
-        if categories is None:
-            self.categories = self._get_categories()
-        else:
-            self.categories = categories
+        self.retain_dataset = copy.deepcopy(self.dataset) if is_retain_dataset else None
+
+        self.categories = categories if categories else self._get_categories()
 
         if self.categories is not None:
             self.cat2id = dict(zip(self.categories, range(len(self.categories))))
@@ -63,9 +62,9 @@ class BaseDataset(Dataset):
             self.class_num = len(self.cat2id)
 
     def _get_categories(self):
-        return None
+        raise NotImplementedError("_get_categories method not implement")
 
-    def _load_dataset(self, data_path):
+    def _load_dataset(self, data_path: Union[str, Path]):
         """
         加载数据集
 
@@ -74,14 +73,11 @@ class BaseDataset(Dataset):
         """  # noqa: ignore flake8"
 
         data_df = self._read_data(data_path)
-
-        if self.is_retain_df:
-            self.df = data_df
-
+        self.df = data_df if self.is_retain_df else None
         return self._convert_to_dataset(data_df)
 
     def _convert_to_dataset(self, data_df):
-        pass
+        raise NotImplementedError("_convert_to_dataset method not implement")
 
     def _read_data(self, data_path, data_format=None, skiprows=-1):
         """
@@ -100,7 +96,7 @@ class BaseDataset(Dataset):
         elif data_format == 'json':
             try:
                 data_df = pd.read_json(data_path, dtype={'label': str})
-            except:
+            except ValueError:
                 data_df = self.read_line_json(data_path)
         elif data_format == 'tsv':
             data_df = pd.read_csv(data_path, sep='\t', dtype={'label': str})
@@ -126,11 +122,11 @@ class BaseDataset(Dataset):
             for index, line in enumerate(reader):
                 if index == skiprows:
                     continue
-                line = json.loads(line)
-                tokens = line['text']
-                label = line['label']
-                datasets.append({'text': tokens.strip(), 'label': label})
-
+                json_line = json.loads(line)
+                datasets.append(json_line)
+                # tokens = line['text']
+                # label = line['label']
+                # datasets.append({'text': tokens.strip(), 'label': label})
         return pd.DataFrame(datasets)
 
     def convert_to_ids(self, tokenizer):
@@ -141,15 +137,12 @@ class BaseDataset(Dataset):
         """
         if tokenizer.tokenizer_type == 'vanilla':
             features = self._convert_to_vanilla_ids(tokenizer)
-        elif tokenizer.tokenizer_type == 'transfomer':
+        elif tokenizer.tokenizer_type == 'transformer':
             features = self._convert_to_transfomer_ids(tokenizer)
         elif tokenizer.tokenizer_type == 'customized':
             features = self._convert_to_customized_ids(tokenizer)
         else:
             raise ValueError("The tokenizer type does not exist")
-
-        if self.is_retain_dataset:
-            self.retain_dataset = copy.deepcopy(self.dataset)
 
         self.dataset = features
 
@@ -162,15 +155,12 @@ class BaseDataset(Dataset):
     def _convert_to_customized_ids(self, customized_tokenizer):
         pass
 
-    def _get_input_length(self, text, bert_tokenizer):
-        pass
-
     @property
-    def dataset_cols(self):
+    def dataset_cols(self) -> List[str]:
         return list(self.dataset[0].keys())
 
     @property
-    def to_device_cols(self):
+    def to_device_cols(self) -> List[str]:
         return list(self.dataset[0].keys())
 
     @property

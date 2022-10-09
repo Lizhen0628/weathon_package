@@ -7,7 +7,9 @@
 
 import copy
 import numpy as np
+from typing import List, Dict
 from weathon.nlp.base import BaseDataset
+from weathon.nlp.processor.tokenizer import SentenceTokenizer
 
 
 class SentenceClassificationDataset(BaseDataset):
@@ -15,14 +17,13 @@ class SentenceClassificationDataset(BaseDataset):
     用于序列分类任务的Dataset
     """
 
-    def _get_categories(self):
+    def _get_categories(self) -> List[str]:
         return sorted(list(set([data['label'] for data in self.dataset])))
 
-    def _convert_to_dataset(self, data_df):
+    def _convert_to_dataset(self, data_df) -> List[Dict]:
 
         dataset = []
-
-        data_df['text'] = data_df['text'].apply(lambda x: x.lower().strip())
+        data_df.loc[:]['text'] = data_df.loc[:]['text'].apply(lambda x: str(x).lower().strip())
 
         feature_names = list(data_df.columns)
         for index_, row_ in enumerate(data_df.itertuples()):
@@ -33,14 +34,12 @@ class SentenceClassificationDataset(BaseDataset):
 
         return dataset
 
-    def _convert_to_transfomer_ids(self, bert_tokenizer):
+    def _convert_to_transfomer_ids(self, bert_tokenizer: SentenceTokenizer):
 
         features = []
         for (index_, row_) in enumerate(self.dataset):
             input_ids = bert_tokenizer.sequence_to_ids(row_['text'])
-
             input_ids, input_mask, segment_ids = input_ids
-
             feature = {
                 'input_ids': input_ids,
                 'attention_mask': input_mask,
@@ -55,7 +54,7 @@ class SentenceClassificationDataset(BaseDataset):
 
         return features
 
-    def _convert_to_vanilla_ids(self, vanilla_tokenizer):
+    def _convert_to_vanilla_ids(self, vanilla_tokenizer) -> List[Dict]:
 
         features = []
         for (index_, row_) in enumerate(self.dataset):

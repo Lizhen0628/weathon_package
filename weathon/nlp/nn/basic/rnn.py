@@ -177,3 +177,53 @@ class RNN(BaseModel):
         output = self.classify(F.relu(out))
 
         return output
+
+
+class RNNForSequenceClassification(RNN):
+
+    def forward(
+            self,
+            input_ids: torch.LongTensor,
+            length: torch.LongTensor,
+            **kwargs
+    ):
+        device = input_ids.device
+        batch_size = input_ids.size()[0]
+
+        out = self.embed(input_ids)
+        out = self.embed_dropout(out)
+
+        if self.bidirectional is True:
+            hidden = self.init_hidden(batch_size, 2, device)
+        else:
+            hidden = self.init_hidden(batch_size, 1, device)
+
+        self.rnn.flatten_parameters()
+        out = pack_padded_sequence(
+            out,
+            length,
+            batch_first=True,
+            enforce_sorted=False
+        )
+        _, hidden = self.rnn(out, hidden)
+        if self.rnn_cell == 'lstm':
+            hidden = hidden[0]
+
+        hidden = self.get_last_hidden_output(hidden)
+
+        out = self.linear(F.relu(hidden))
+        out = self.fc_dropout(out)
+
+        output = self.classify(F.relu(out))
+
+        return output
+
+
+class RNNForTokenizerClassification(RNN):
+    def forward(
+            self,
+            input_ids: torch.LongTensor,
+            length: torch.LongTensor,
+            **kwargs
+    ):
+        pass

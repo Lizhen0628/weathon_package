@@ -34,7 +34,7 @@ class TransformerUtils:
 
         model = AutoModel.from_pretrained(model_name)
         model.save_pretrained(path)
-        print(path, 'done.')
+        print(os.path.abspath(path), 'done.')
 
     @staticmethod
     def load_tf_weights_in_nezha(model, config, tf_checkpoint_path):

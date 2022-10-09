@@ -49,7 +49,6 @@ class TCTask(SequenceClassificationTask):
         step,
         inputs,
         outputs,
-        logits,
         loss,
         verbose=True,
         show_step=100,

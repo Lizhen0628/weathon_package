@@ -18,8 +18,8 @@ class TransfomerTokenizer(BaseTokenizer):
         max_seq_len (:obj:`int`): 预设的文本最大长度
     """  # noqa: ignore flake8"
 
-    def __init__(self, vocab: Union[BertTokenizer, AutoTokenizer, BaseVocab], max_seq_len: int, max_seq_length: int):
-        super().__init__(vocab, max_seq_length)
+    def __init__(self, vocab: Union[BertTokenizer, AutoTokenizer, BaseVocab], max_seq_len: int):
+        super().__init__(vocab, max_seq_len)
         if isinstance(vocab, str):
             # TODO: 改成由自定义的字典所决定
             try:
@@ -30,7 +30,7 @@ class TransfomerTokenizer(BaseTokenizer):
         self.vocab = vocab
         self.max_seq_len = max_seq_len
         self.additional_special_tokens = set()
-        self.tokenizer_type = 'transfomer'
+        self.tokenizer_type = 'transformer'
 
     @staticmethod
     def _is_control(ch: str) -> bool:
@@ -98,10 +98,11 @@ class TransfomerTokenizer(BaseTokenizer):
         return self.pair_to_ids(sequence_a, sequence_b, **kwargs) if sequence_b else self.sentence_to_ids(sequence_a,
                                                                                                           **kwargs)
 
-    def sentence_to_ids(self, sequence: Union[str, List[str]]) -> Tuple[np.ndarray, np.ndarray, np.ndarray, int]:
+    def sentence_to_ids(self, sequence: Union[str, List[str]], return_sequence_length: bool = False) -> Tuple[
+        np.ndarray, np.ndarray, np.ndarray]:
         if type(sequence) == str:
             sequence = self.tokenize(sequence)
-
+        token_length = len(sequence)
         # 对超长序列进行截断
         if len(sequence) > self.max_seq_len - 2:
             sequence = sequence[0:(self.max_seq_len - 2)]
@@ -123,10 +124,15 @@ class TransfomerTokenizer(BaseTokenizer):
         sequence_mask = np.asarray(sequence_mask, dtype='int64')
         segment_ids = np.asarray(segment_ids, dtype='int64')
 
-        return sequence, sequence_mask, segment_ids, len(sequence)
+        return (sequence, sequence_mask, segment_ids, token_length) if return_sequence_length else (
+            sequence, sequence_mask, segment_ids)
 
-    def pair_to_ids(self, sequence_a: str, sequence_b: str, truncation_method: str = 'average') -> \
-            Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]:
+    def pair_to_ids(self,
+                    sequence_a: str,
+                    sequence_b: str,
+                    truncation_method: str = 'average',
+                    return_sequence_length: bool = False
+                    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]:
         if type(sequence_a) == str:
             sequence_a = self.tokenize(sequence_a)
 
@@ -169,7 +175,8 @@ class TransfomerTokenizer(BaseTokenizer):
         sequence_mask = np.asarray(sequence_mask, dtype='int64')
         segment_ids = np.asarray(segment_ids, dtype='int64')
 
-        return sequence, sequence_mask, segment_ids, sequence_length
+        return (sequence, sequence_mask, segment_ids, sequence_length) if return_sequence_length else (
+            sequence, sequence_mask, segment_ids)
 
 
 class SentenceTokenizer(TransfomerTokenizer):
@@ -180,6 +187,10 @@ class SentenceTokenizer(TransfomerTokenizer):
         max_seq_len (:obj:`int`): 预设的文本最大长度
     """  # noqa: ignore flake8"
 
+    def sequence_to_ids(self, sequence_a: Union[str, List[str]], sequence_b: Union[str, List[str]] = None,
+                        **kwargs) -> Tuple:
+        return self.sentence_to_ids(sequence_a, **kwargs)
+
 
 class PairTokenizer(TransfomerTokenizer):
     """
@@ -188,6 +199,10 @@ class PairTokenizer(TransfomerTokenizer):
         vocab: transformers词典类对象、词典地址或词典名，用于实现文本分词和ID化
         max_seq_len (:obj:`int`): 预设的文本最大长度
     """  # noqa: ignore flake8"
+
+    def sequence_to_ids(self, sequence_a: Union[str, List[str]], sequence_b: Union[str, List[str]] = None,
+                        **kwargs) -> Tuple:
+        return self.pair_to_ids(sequence_a, sequence_b, **kwargs)
 
 
 class TokenTokenizer(TransfomerTokenizer):
@@ -309,10 +324,9 @@ class ErnieCtmTokenizer(TransfomerTokenizer):
         cls_num (int): CLS类特殊字符的数量，例如"[CLS0]"、"[CLS1]", 默认值为2
     """  # noqa: ignore flake8"
 
-    def __init__(self, vocab: Union[BertTokenizer, AutoTokenizer, BaseVocab], max_seq_len: int, max_seq_length: int,
-                 cls_num: int = 2):
+    def __init__(self, vocab: Union[BertTokenizer, AutoTokenizer, BaseVocab], max_seq_len: int, cls_num: int = 2):
 
-        super().__init__(vocab, max_seq_len, max_seq_length)
+        super().__init__(vocab, max_seq_len, max_seq_len)
         self.additional_special_tokens = set()
 
         self.cls_num = cls_num

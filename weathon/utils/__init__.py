@@ -19,7 +19,7 @@ from weathon.utils.dictionary import Dictionary  # 词库
 from weathon.utils.transformer_utils import TransformerUtils
 
 # 模型训练相关
-from weathon.utils.seed_utils import Seed  # 设置随机种子
+from weathon.utils.environment_utils import EnvironmentUtils  # 训练环境设置
 from weathon.utils.sampler import ImbalancedDatasetSampler  # 模型采样
 from weathon.utils.optimizer_utils import OptimizerUtils  # 优化器
 from weathon.utils.schedule_utils import ScheduleUtils  # 优化器 scheduler

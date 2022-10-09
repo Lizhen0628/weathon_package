@@ -12,7 +12,7 @@ import warnings
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from weathon.nlp.base import BaseTask
-from weathon.utils import OptimizerUtils
+from weathon.utils import ScheduleUtils
 
 
 class SequenceClassificationTask(BaseTask):
@@ -41,8 +41,6 @@ class SequenceClassificationTask(BaseTask):
             self,
             train_data,
             validation_data=None,
-            lr=False,
-            params=None,
             batch_size=32,
             epochs=1,
             gradient_accumulation_steps=1,
@@ -54,8 +52,6 @@ class SequenceClassificationTask(BaseTask):
         Args:
             train_data (:obj:`ark_nlp dataset`): 训练的batch文本
             validation_data (:obj:`ark_nlp dataset`): 验证的batch文本
-            lr (:obj:`float` or :obj:`bool`, optional, defaults to False): 学习率
-            params (:obj:`str` or :obj:`torch.optim.Optimizer` or :obj:`list` or :obj:`None`, optional, defaults to None): 优化器，可能是名称、对象、参数列表
             batch_size (:obj:`int`, optional, defaults to 32): batch大小
             epochs (:obj:`int`, optional, defaults to 1): 训练轮数
             gradient_accumulation_steps (:obj:`int`, optional, defaults to 1): 梯度累计数
@@ -64,18 +60,10 @@ class SequenceClassificationTask(BaseTask):
 
         self.logs = dict()
 
-        train_generator = self._on_train_begin(
-            train_data,
-            validation_data,
-            batch_size,
-            lr,
-            params,
-            shuffle=True,
-            **kwargs
-        )
+        train_generator = self._on_train_begin(train_data, validation_data, batch_size, shuffle=True, **kwargs)
 
         for epoch in range(epochs):
-
+            # module.train(), 重置 epoch_loss,epoch_evaluation, epoch_step
             self._on_epoch_begin(**kwargs)
 
             for step, inputs in enumerate(tqdm(train_generator)):
@@ -99,7 +87,7 @@ class SequenceClassificationTask(BaseTask):
                     self._on_optimize(inputs, outputs, logits, loss, **kwargs)
 
                 # setp evaluate
-                self._on_step_end(step, inputs, outputs, logits, loss, **kwargs)
+                self._on_step_end(step, inputs, outputs, loss, **kwargs)
 
             self._on_epoch_end(epoch, **kwargs)
 
@@ -113,16 +101,16 @@ class SequenceClassificationTask(BaseTask):
             train_data,
             validation_data,
             batch_size,
-            lr,
-            params,
+            epochs,
             shuffle,
+            warmup_proportion=None,
             num_workers=0,
             train_to_device_cols=None,
             **kwargs
     ):
         if hasattr(train_data, 'id2cat'):
             self.id2cat = train_data.id2cat
-            self.cat2id = {v_: k_ for k_, v_ in train_data.id2cat.items()}
+            self.cat2id = train_data.cat2id
 
         # 在初始化时会有class_num参数，若在初始化时不指定，则在训练阶段从训练集获取信息
         if self.class_num is None:
@@ -131,46 +119,25 @@ class SequenceClassificationTask(BaseTask):
             else:
                 warnings.warn("The class_num is None.")
 
-        if train_to_device_cols is None:
-            self.train_to_device_cols = train_data.to_device_cols
-        else:
-            self.train_to_device_cols = train_to_device_cols
-
-        train_generator = DataLoader(
-            train_data,
-            batch_size=batch_size,
-            shuffle=True,
-            num_workers=num_workers,
-            collate_fn=self._train_collate_fn
-        )
+        self.train_to_device_cols = train_to_device_cols if train_to_device_cols else train_data.to_device_cols
+        train_generator = DataLoader(train_data, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers,
+                                     collate_fn=self._train_collate_fn)
         self.train_generator_lenth = len(train_generator)
 
-        self.optimizer = OptimizerUtils.get_optimizer(self.optimizer, self.module, lr, params)
+        self.scheduler = self._prepare_scheduler(warmup_proportion, epochs) if warmup_proportion else None
+
         self.optimizer.zero_grad()
 
         self.module.train()
 
+        # 初始化 global_step 和 global_loss
         self._on_train_begin_record(**kwargs)
 
         return train_generator
 
-    def _on_train_begin_record(self, **kwargs):
-
-        self.logs['global_step'] = 0
-        self.logs['global_loss'] = 0
-
     def _on_epoch_begin(self, **kwargs):
-
         self.module.train()
-
         self._on_epoch_begin_record(**kwargs)
-
-    def _on_epoch_begin_record(self, **kwargs):
-
-        self.logs['epoch_loss'] = 0
-        # 占位作用，子类仅使用单个指标进行评价，则直接使用该字段即可
-        self.logs['epoch_evaluation'] = 0
-        self.logs['epoch_step'] = 0
 
     def _on_step_begin(
             self,
@@ -232,7 +199,8 @@ class SequenceClassificationTask(BaseTask):
             outputs,
             logits,
             loss,
-            gradient_accumulation_steps=1,
+            gradient_accumulation_steps: int = 1,
+            loss_cut: float = None,
             **kwargs
     ):
 
@@ -243,6 +211,8 @@ class SequenceClassificationTask(BaseTask):
         if gradient_accumulation_steps > 1:
             loss = loss / gradient_accumulation_steps
 
+        if loss_cut:
+            loss = torch.where(loss > float(loss_cut), loss, torch.zeros_like(loss))
         loss.backward()
 
         self._on_backward_record(loss, **kwargs)
