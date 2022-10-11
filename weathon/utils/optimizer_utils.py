@@ -104,9 +104,9 @@ class OptimizerUtils:
     def get_transformer_parameters(model, lr: float = 3e-5, weight_decay: float = 1e-3):
         no_decay = ["bias", "LayerNorm.weight"]
         group_parameters = [
-            {"params": [p for n, p in model.bert.name_parameters() if not any(nd in n for nd in no_decay)],
+            {"params": [p for n, p in model.bert.named_parameters() if not any(nd in n for nd in no_decay)],
              "weight_decay": weight_decay, "lr": lr},
-            {"params": [p for n, p in model.bert.name_parameters() if any(nd in n for nd in no_decay)],
+            {"params": [p for n, p in model.bert.named_parameters() if any(nd in n for nd in no_decay)],
              "weight_decay": 0.0, "lr": lr},
         ]
         return group_parameters
@@ -115,9 +115,9 @@ class OptimizerUtils:
     def get_classifier_parameters(model, lr: float = 1e-3, weight_decay: float = 1e-3):
         no_decay = ["bias", "LayerNorm.weight"]
         group_parameters = [
-            {"params": [p for n, p in model.classifier.name_parameters() if not any(nd in n for nd in no_decay)],
+            {"params": [p for n, p in model.classifier.named_parameters() if not any(nd in n for nd in no_decay)],
              "weight_decay": weight_decay, "lr": lr},
-            {"params": [p for n, p in model.classifier.name_parameters() if any(nd in n for nd in no_decay)],
+            {"params": [p for n, p in model.classifier.named_parameters() if any(nd in n for nd in no_decay)],
              "weight_decay": 0.0, "lr": lr},
         ]
         return group_parameters

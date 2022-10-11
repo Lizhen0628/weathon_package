@@ -137,7 +137,7 @@ class CasRelRETask(SequenceClassificationTask):
                 inputs = self._get_module_inputs_on_train(inputs, **kwargs)
 
                 # forward
-                outputs = self.module(**inputs)
+                outputs = self.model(**inputs)
 
                 # 计算损失
                 logits, loss = self._get_train_loss(inputs, outputs, **kwargs)
@@ -165,11 +165,11 @@ class CasRelRETask(SequenceClassificationTask):
 
         train_data_prefetcher = DataPreFetcher(
             train_generator,
-            self.module.device
+            self.model.device
         )
         inputs = train_data_prefetcher.next()
 
-        self.module.train()
+        self.model.train()
 
         self._on_epoch_begin_record(**kwargs)
 
@@ -224,7 +224,7 @@ class CasRelRETask(SequenceClassificationTask):
             **kwargs
         )
 
-        test_data_prefetcher = DataPreFetcher(evaluate_generator, self.module.device)
+        test_data_prefetcher = DataPreFetcher(evaluate_generator, self.model.device)
         inputs = test_data_prefetcher.next()
         correct_num, predict_num, gold_num = 0, 0, 0
         step_ = 0
@@ -238,9 +238,9 @@ class CasRelRETask(SequenceClassificationTask):
                 token_mapping = inputs['token_mapping'][0]
                 mask = inputs['attention_mask']
 
-                encoded_text = self.module.bert(token_ids, mask)[0]
+                encoded_text = self.model.bert(token_ids, mask)[0]
 
-                pred_sub_heads, pred_sub_tails = self.module.get_subs(encoded_text)
+                pred_sub_heads, pred_sub_tails = self.model.get_subs(encoded_text)
                 sub_heads, sub_tails = np.where(pred_sub_heads.cpu()[0] > h_bar)[0], \
                                        np.where(pred_sub_tails.cpu()[0] > t_bar)[0]
 
@@ -268,7 +268,7 @@ class CasRelRETask(SequenceClassificationTask):
                     sub_tail_mapping = sub_tail_mapping.to(repeated_encoded_text)
                     sub_head_mapping = sub_head_mapping.to(repeated_encoded_text)
 
-                    pred_obj_heads, pred_obj_tails = self.module.get_objs_for_specific_sub(
+                    pred_obj_heads, pred_obj_tails = self.model.get_objs_for_specific_sub(
                         sub_head_mapping,
                         sub_tail_mapping,
                         repeated_encoded_text
@@ -339,7 +339,7 @@ class CasRelRETask(SequenceClassificationTask):
             collate_fn=self._evaluate_collate_fn
         )
 
-        self.module.eval()
+        self.model.eval()
 
         self._on_evaluate_begin_record(**kwargs)
 

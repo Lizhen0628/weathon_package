@@ -111,7 +111,7 @@ class CRFNERTask(TokenClassificationTask):
         verbose=True,
         **kwargs
     ):
-        loss = -1 * self.module.crf(
+        loss = -1 * self.model.crf(
             emissions=logits,
             tags=inputs['label_ids'].long(),
             mask=inputs['attention_mask']
@@ -125,7 +125,7 @@ class CRFNERTask(TokenClassificationTask):
             # compute loss
             logits, loss = self._get_evaluate_loss(inputs, outputs, **kwargs)
 
-            tags = self.module.crf.decode(logits, inputs['attention_mask'])
+            tags = self.model.crf.decode(logits, inputs['attention_mask'])
             tags = tags.squeeze(0)
 
         self.evaluate_logs['labels'].append(inputs['label_ids'].cpu())
@@ -421,8 +421,8 @@ class SpanNERTask(TokenClassificationTask):
         self.metric = SpanMetrics(self.id2cat)
 
         if self.ema_decay:
-            self.ema.store(self.module.parameters())
-            self.ema.copy_to(self.module.parameters())
+            self.ema.store(self.model.parameters())
+            self.ema.copy_to(self.model.parameters())
 
         self._on_epoch_begin_record(**kwargs)
 

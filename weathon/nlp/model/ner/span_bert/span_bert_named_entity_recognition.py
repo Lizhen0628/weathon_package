@@ -83,8 +83,8 @@ class SpanNERTask(TokenClassificationTask):
         self.metric = SpanMetrics(self.id2cat)
 
         if self.ema_decay:
-            self.ema.store(self.module.parameters())
-            self.ema.copy_to(self.module.parameters())
+            self.ema.store(self.model.parameters())
+            self.ema.copy_to(self.model.parameters())
 
         self._on_epoch_begin_record(**kwargs)
 

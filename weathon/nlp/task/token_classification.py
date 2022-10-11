@@ -28,8 +28,8 @@ class TokenClassificationTask(SequenceClassificationTask):
 
     def __init__(self, *args, **kwargs):
         super(SequenceClassificationTask, self).__init__(*args, **kwargs)
-        if hasattr(self.module, 'task') is False:
-            self.module.task = 'TokenLevel'
+        if hasattr(self.model, 'task') is False:
+            self.model.task = 'TokenLevel'
 
     def _compute_loss(
             self,

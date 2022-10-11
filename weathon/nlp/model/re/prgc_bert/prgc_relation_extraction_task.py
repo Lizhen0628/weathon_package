@@ -135,8 +135,8 @@ class PRGCRETask(SequenceClassificationTask):
     def __init__(self, *args, **kwargs):
 
         super(PRGCRETask, self).__init__(*args, **kwargs)
-        if hasattr(self.module, 'task') is False:
-            self.module.task = 'TokenLevel'
+        if hasattr(self.model, 'task') is False:
+            self.model.task = 'TokenLevel'
 
     def _train_collate_fn(self, batch):
         """将InputFeatures转换为Tensor"""
@@ -208,9 +208,9 @@ class PRGCRETask(SequenceClassificationTask):
         attention_mask = inputs['attention_mask'].view(-1)
         # sequence label loss
         loss_func = nn.CrossEntropyLoss(reduction='none')
-        loss_seq_sub = (loss_func(output_sub.view(-1, self.module.seq_tag_size),
+        loss_seq_sub = (loss_func(output_sub.view(-1, self.model.seq_tag_size),
                                   inputs['seq_tags'][:, 0, :].reshape(-1)) * attention_mask).sum() / attention_mask.sum()
-        loss_seq_obj = (loss_func(output_obj.view(-1, self.module.seq_tag_size),
+        loss_seq_obj = (loss_func(output_obj.view(-1, self.model.seq_tag_size),
                                   inputs['seq_tags'][:, 1, :].reshape(-1)) * attention_mask).sum() / attention_mask.sum()
         loss_seq = (loss_seq_sub + loss_seq_obj) / 2
         # init
@@ -258,7 +258,7 @@ class PRGCRETask(SequenceClassificationTask):
             collate_fn=self._evaluate_collate_fn
         )
 
-        self.module.eval()
+        self.model.eval()
 
         self._on_evaluate_begin_record(**kwargs)
 

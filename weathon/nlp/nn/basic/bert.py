@@ -113,22 +113,16 @@ class Bert(BertPreTrainedModel):
         return out
 
 
-class BertForSequenceClassification(BertPreTrainedModel):
+class BertForSequenceClassification(Bert):
 
-    def __init__(
-            self,
-            transformer_model_name: str,
-            num_labels: int,
-            encoder_trained=True,
-            pooling='cls_with_pooler'
-    ):
+    def __init__(self, transformer_model_name: str, num_labels: int, encoder_trained=True, pooling='cls_with_pooler'):
         super(BertForSequenceClassification, self).__init__(transformer_model_name=transformer_model_name,
                                                             num_labels=num_labels, encoder_trained=encoder_trained,
                                                             pooling=pooling)
         self.task = 'SequenceLevel'
 
 
-class BertForTokenClassification(BertPreTrainedModel):
+class BertForTokenClassification(Bert):
     """
     基于BERT的命名实体模型
 
@@ -142,14 +136,8 @@ class BertForTokenClassification(BertPreTrainedModel):
         [1] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding  
     """  # noqa: ignore flake8"
 
-    def __init__(
-            self,
-            transformer_model_name: str,
-            num_labels: int,
-            encoder_trained=True
-    ):
-
+    def __init__(self, transformer_model_name: str, num_labels: int, encoder_trained=True):
         super(BertForTokenClassification, self).__init__(transformer_model_name=transformer_model_name,
-                                                            num_labels=num_labels, encoder_trained=encoder_trained)
+                                                         num_labels=num_labels, encoder_trained=encoder_trained)
 
         self.task = 'TokenLevel'

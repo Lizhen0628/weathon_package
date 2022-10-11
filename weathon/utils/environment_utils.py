@@ -14,8 +14,9 @@ import numpy as np
 class EnvironmentUtils:
 
     @staticmethod
-    def set_environ():
+    def set_environ(seed: int = 7):
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        EnvironmentUtils.set_seed(seed)
 
     @staticmethod
     def set_seed(seed: int = 7):

@@ -37,8 +37,8 @@ class TextLevelGCNTask(SequenceClassificationTask):
 
         for sample in batch:
             sample_graph = sample['sub_graph'].to(self.device)
-            sample_graph.ndata['h'] = self.module.node_embed(torch.Tensor(sample['node_ids']).type(torch.long).to(self.device))
-            sample_graph.edata['w'] = self.module.edge_embed(torch.Tensor(sample['edge_ids']).type(torch.long).to(self.device))
+            sample_graph.ndata['h'] = self.model.node_embed(torch.Tensor(sample['node_ids']).type(torch.long).to(self.device))
+            sample_graph.edata['w'] = self.model.edge_embed(torch.Tensor(sample['edge_ids']).type(torch.long).to(self.device))
 
             batch_graph.append(sample_graph)
             batch_label_ids.append(sample['label_ids'])
