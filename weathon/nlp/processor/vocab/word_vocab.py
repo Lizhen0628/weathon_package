@@ -1,5 +1,4 @@
 import re
-import pickle
 import jieba
 
 from zhon.hanzi import punctuation
@@ -78,7 +77,7 @@ class WordVocab(BaseVocab):
             tokens = cls.word_tokenize(text)
         else:
             # To Do: add eorr message
-            pass
+            raise ValueError(f"{mode} is not exists")
 
         if stop_words:
             tokens = filter(lambda w: w not in stop_words, tokens)

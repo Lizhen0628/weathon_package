@@ -3,7 +3,7 @@ import unicodedata
 import transformers
 import numpy as np
 
-from typing import List, Union, Set, Tuple
+from typing import List, Union, Tuple
 from copy import deepcopy
 from weathon.nlp.base import BaseVocab, BaseTokenizer
 from transformers import BertTokenizer, AutoTokenizer
@@ -17,6 +17,7 @@ class TransfomerTokenizer(BaseTokenizer):
         vocab: transformers词典类对象、词典地址或词典名，用于实现文本分词和ID化
         max_seq_len (:obj:`int`): 预设的文本最大长度
     """  # noqa: ignore flake8"
+    tokenizer_type = 'transformer'
 
     def __init__(self, vocab: Union[BertTokenizer, AutoTokenizer, BaseVocab], max_seq_len: int):
         super().__init__(vocab, max_seq_len)
@@ -30,7 +31,6 @@ class TransfomerTokenizer(BaseTokenizer):
         self.vocab = vocab
         self.max_seq_len = max_seq_len
         self.additional_special_tokens = set()
-        self.tokenizer_type = 'transformer'
 
     @staticmethod
     def _is_control(ch: str) -> bool:

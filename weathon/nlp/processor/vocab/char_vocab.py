@@ -42,7 +42,7 @@ class CharVocab(BaseVocab):
         tokens, _ = list(zip(*count_pairs))
         return list(tokens)
 
-    def add(self, token: str, cnt=1) -> int:
+    def add(self, token: str) -> int:
         if token in self.token2id:
             idx = self.token2id[token]
         else:

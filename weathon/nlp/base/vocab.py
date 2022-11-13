@@ -10,7 +10,7 @@ import json
 from typing import List
 
 
-class BaseVocab(object, metaclass=abc.ABCMeta):
+class BaseVocab(metaclass=abc.ABCMeta):
 
     def __init__(self):
         self.id2token = {}
@@ -20,15 +20,38 @@ class BaseVocab(object, metaclass=abc.ABCMeta):
         self.unk_token = '[UNK]'
 
     @abc.abstractmethod
-    def add(self, token: str, cnt=1) -> int:
+    def add(self, token: str) -> int:
+        """
+        向词表中添加token，并返回token在词表中对应的index
+        Args:
+            token:
+        Returns:
+            token在词表中对应的id
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
     def get_id(self, token: str) -> int:
+        """
+        获取token对应的token_id，如果token在词表中不存在，返回unk_token对应的id
+        Args:
+            token: 输入token
+
+        Returns:返回token对应的token_id。
+
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_token(self,idx:int) -> str:
+    def get_token(self, idx: int) -> str:
+        """
+        根据idx返回对应的token
+        Args:
+            idx:
+
+        Returns:
+
+        """
         raise NotImplementedError
 
     @abc.abstractmethod
