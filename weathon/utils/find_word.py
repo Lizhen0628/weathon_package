@@ -3,7 +3,7 @@
 # @Author  : LiZhen
 # @FileName: find_word.py
 # @github  : https://github.com/Lizhen0628
-# @Description:
+# @Description:  另一个新词发现的包：https://github.com/yongzhuo/Macropodus/blob/1d7b8f9938cb8b6d7744e9caabc3eb41c8891283/macropodus/segment/word_discovery/word_discovery.py
 
 import re
 from math import log
