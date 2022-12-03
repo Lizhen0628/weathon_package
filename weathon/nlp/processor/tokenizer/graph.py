@@ -2,7 +2,7 @@ import dgl
 
 from weathon.nlp.base import BaseTokenizer, BaseVocab
 from transformers import BertTokenizer, AutoTokenizer
-from typing import Union, List, Set,Tuple
+from typing import Union, List, Set, Tuple
 
 
 class TextLevelGCNTokenizer(BaseTokenizer):
@@ -21,7 +21,7 @@ class TextLevelGCNTokenizer(BaseTokenizer):
         self.graph = graph
         self.tokenizer_type = 'graph'
 
-    def sequence_to_graph(self, sequence:Union[str,List[str]]) -> Tuple[List[int],List[int],dgl.DGLHeteroGraph]:
+    def sequence_to_graph(self, sequence: Union[str, List[str]]) -> Tuple[List[int], List[int], dgl.DGLHeteroGraph]:
         if type(sequence) == str:
             sequence = self.tokenize(sequence)
 

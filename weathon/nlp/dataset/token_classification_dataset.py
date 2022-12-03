@@ -7,31 +7,7 @@
 
 import torch
 import numpy as np
-from weathon.nlp.base import BaseDataset
-
-
-class TokenClassificationDataset(BaseDataset):
-    """
-    用于字符分类任务的Dataset
-    """
-
-    def _convert_to_dataset(self, data_df):
-
-        dataset = []
-
-        data_df['text'] = data_df['text'].apply(lambda x: x.strip())
-        if not self.is_test:
-            data_df['label'] = data_df['label'].apply(
-                lambda x: eval(x) if type(x) == str else x)
-
-        feature_names = list(data_df.columns)
-        for index_, row_ in enumerate(data_df.itertuples()):
-            dataset.append({
-                feature_name_: getattr(row_, feature_name_)
-                for feature_name_ in feature_names
-            })
-
-        return dataset
+from weathon.nlp.base import TokenClassificationDataset
 
 
 class SpanNERDataset(TokenClassificationDataset):
@@ -40,15 +16,13 @@ class SpanNERDataset(TokenClassificationDataset):
     """  # noqa: ignore flake8"
 
     def _get_categories(self):
-        categories = sorted(list(set([label_['type']
-                                      for data in self.dataset for label_ in data['label']])))
+        categories = sorted(list(set([label_['type'] for data in self.dataset for label_ in data['label']])))
         if 'O' in categories:
             categories.remove('O')
         categories.insert(0, 'O')
         return categories
 
     def _convert_to_transfomer_ids(self, bert_tokenizer):
-
         features = []
         for (index_, row_) in enumerate(self.dataset):
             tokens = bert_tokenizer.tokenize(row_['text'])[:bert_tokenizer.max_seq_len - 2]

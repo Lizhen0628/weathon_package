@@ -9,7 +9,6 @@ from weathon.nlp.dataset.sentence_classification_dataset import TMDataset
 from weathon.nlp.dataset.sentence_classification_dataset import PromptDataset
 from weathon.nlp.dataset.sentence_classification_dataset import TextLevelGCNDataset
 
-from weathon.nlp.dataset.token_classification_dataset import TokenClassificationDataset
 from weathon.nlp.dataset.token_classification_dataset import BIONERDataset
 from weathon.nlp.dataset.token_classification_dataset import BiaffineNERDataset
 from weathon.nlp.dataset.token_classification_dataset import SpanNERDataset

@@ -4,7 +4,7 @@ from weathon.nlp.base import BaseVocab
 from typing import Union, List, Set
 
 
-class LabelVocab(BaseVocab):
+class LabelVocab:
 
     def __init__(self, initial_labels: Union[List[str], Set[str]] = None):
         super().__init__()

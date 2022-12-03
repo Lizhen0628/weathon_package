@@ -8,17 +8,13 @@
 import os
 import pypinyin
 import regex as re
-from pathlib import Path
 from typing import List, Union
-from collections import defaultdict
 from weathon.utils.char_utils import CharUtils
 from weathon.utils.dictionary import Dictionary
 from weathon.utils.string_converter import ConvertMap, Converter
 
-CNPuncs_rule = re.compile("[。，！？、；：“”‘’（）【】\{\}『』「」〔〕——……—\-～·《》〈〉﹏___\.]")
 
-ENPuncs_rule = re.compile(
-    "[,\.\":\)\(\-!\?\|;'\$&/\[\]>%=#\*\+\\•~@£·_\{\}©\^®`<→°€™›♥←×§″′Â█½à…“★”–●â►−¢²¬░¶↑±¿▾═¦║―¥▓—‹─▒：¼⊕▼▪†■’▀¨▄♫☆é¯♦¤▲è¸¾Ã⋅‘∞∙）↓、│（»，♪╩╚³・╦╣╔╗▬❤ïØ¹≤‡√]")
+
 
 
 def add_curr_dir(name):
@@ -26,6 +22,10 @@ def add_curr_dir(name):
 
 
 class StringUtils:
+
+    CNPuncs_rule = re.compile("[。，！？、；：“”‘’（）【】\{\}『』「」〔〕——……—\-～·《》〈〉﹏___\.]")
+    ENPuncs_rule = re.compile(
+        "[,\.\":\)\(\-!\?\|;'\$&/\[\]>%=#\*\+\\•~@£·_\{\}©\^®`<→°€™›♥←×§″′Â█½à…“★”–●â►−¢²¬░¶↑±¿▾═¦║―¥▓—‹─▒：¼⊕▼▪†■’▀¨▄♫☆é¯♦¤▲è¸¾Ã⋅‘∞∙）↓、│（»，♪╩╚³・╦╣╔╗▬❤ïØ¹≤‡√]")
 
     @staticmethod
     def cut_sentences(sentence: str) -> List[str]:
@@ -150,7 +150,7 @@ class StringUtils:
         return result
 
     @staticmethod
-    def remove_string_punc(cls, s: str) -> str:
+    def remove_string_punc(s: str) -> str:
         """去除字符串中的标点符号"""
         s = CNPuncs_rule.sub("", s)
         s = ENPuncs_rule.sub("", s)

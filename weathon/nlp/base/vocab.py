@@ -5,12 +5,12 @@
 # @github  : https://github.com/Lizhen0628
 # @Description:
 
-import abc
 import json
 from typing import List
+from abc import ABC, abstractmethod
 
 
-class BaseVocab(metaclass=abc.ABCMeta):
+class BaseVocab(ABC):
 
     def __init__(self):
         self.id2token = {}
@@ -19,7 +19,7 @@ class BaseVocab(metaclass=abc.ABCMeta):
         self.pad_token = '[PAD]'
         self.unk_token = '[UNK]'
 
-    @abc.abstractmethod
+    @abstractmethod
     def add(self, token: str) -> int:
         """
         向词表中添加token，并返回token在词表中对应的index
@@ -30,7 +30,7 @@ class BaseVocab(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_id(self, token: str) -> int:
         """
         获取token对应的token_id，如果token在词表中不存在，返回unk_token对应的id
@@ -42,7 +42,7 @@ class BaseVocab(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_token(self, idx: int) -> str:
         """
         根据idx返回对应的token
@@ -54,7 +54,7 @@ class BaseVocab(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
+    @abstractmethod
     def tokenize(self, text: str) -> List[str]:
         raise NotImplementedError
 

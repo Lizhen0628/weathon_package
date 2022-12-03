@@ -6,14 +6,14 @@
 # @Description:
 
 
-import abc
+from abc import ABC,abstractmethod
 import numpy as np
 from transformers import BertTokenizer, AutoTokenizer
 from weathon.nlp.base.vocab import BaseVocab
 from typing import Union, List, Set
 
 
-class BaseTokenizer(object, metaclass=abc.ABCMeta):
+class BaseTokenizer(ABC):
     """
     分词器基类
     """
@@ -35,3 +35,7 @@ class BaseTokenizer(object, metaclass=abc.ABCMeta):
         else:
             seq[-len(trunc)] = trunc
         return seq
+
+    @abstractmethod
+    def sequence_to_ids(self,sequence, reverse=False, padding="post", truncating="post"):
+        raise NotImplementedError("sequence_to_ids not implement")

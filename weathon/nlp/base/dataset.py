@@ -9,8 +9,9 @@ import json
 import copy
 import codecs
 import pandas as pd
+from abc import abstractmethod, ABC
 from pathlib import Path
-from typing import Union, List, Set, Dict
+from typing import Union, List
 from collections import defaultdict
 from torch.utils.data import Dataset
 from pandas.core.frame import DataFrame
@@ -26,7 +27,6 @@ class BaseDataset(Dataset):
         categories (:obj:`list`, optional, defaults to `None`): 数据类别
         is_retain_df (:obj:`bool`, optional, defaults to False): 是否将DataFrame格式的原始数据复制到属性retain_df中
         is_retain_dataset (:obj:`bool`, optional, defaults to False): 是否将处理成dataset格式的原始数据复制到属性retain_dataset中
-        is_train (:obj:`bool`, optional, defaults to True): 数据集是否为训练集数据
         is_test (:obj:`bool`, optional, defaults to False): 数据集是否为测试集数据
     """  # noqa: ignore flake8"
 
@@ -61,10 +61,15 @@ class BaseDataset(Dataset):
 
             self.class_num = len(self.cat2id)
 
+    @abstractmethod
     def _get_categories(self):
         raise NotImplementedError("_get_categories method not implement")
 
-    def _load_dataset(self, data_path: Union[str, Path]):
+    @abstractmethod
+    def _convert_to_dataset(self, data_df):
+        raise NotImplementedError("_convert_to_dataset method not implement")
+
+    def _load_dataset(self, data_path: Path):
         """
         加载数据集
 
@@ -76,38 +81,31 @@ class BaseDataset(Dataset):
         self.df = data_df if self.is_retain_df else None
         return self._convert_to_dataset(data_df)
 
-    def _convert_to_dataset(self, data_df):
-        raise NotImplementedError("_convert_to_dataset method not implement")
-
-    def _read_data(self, data_path, data_format=None, skiprows=-1):
+    def _read_data(self, data_path: Path):
         """
         读取所需数据
         Args:
             data_path (:obj:`string`): 数据地址
-            data_format (:obj:`string`, defaults to `None`): 数据存储格式
-            skiprows (:obj:`int`, defaults to -1): 读取跳过指定行数，默认为不跳过
         """  # noqa: ignore flake8"
 
-        if data_format is None:
-            data_format = data_path.split('.')[-1]
 
-        if data_format == 'csv':
+        if data_path.suffix == '.csv':
             data_df = pd.read_csv(data_path, dtype={'label': str})
-        elif data_format == 'json':
+        elif data_path.suffix == '.json':
             try:
                 data_df = pd.read_json(data_path, dtype={'label': str})
             except ValueError:
                 data_df = self.read_line_json(data_path)
-        elif data_format == 'tsv':
+        elif data_path.suffix == '.tsv':
             data_df = pd.read_csv(data_path, sep='\t', dtype={'label': str})
-        elif data_format == 'txt':
+        elif data_path.suffix == '.txt':
             data_df = pd.read_csv(data_path, sep='\t', dtype={'label': str})
         else:
             raise ValueError("The data format does not exist")
 
         return data_df
 
-    def read_line_json(self, data_path, skiprows=-1):
+    def read_line_json(self, data_path:Path):
         """
         读取所需数据
 
@@ -117,11 +115,8 @@ class BaseDataset(Dataset):
         """
         datasets = []
 
-        with codecs.open(data_path, mode='r', encoding='utf8') as f:
-            reader = f.readlines()
-            for index, line in enumerate(reader):
-                if index == skiprows:
-                    continue
+        with data_path.open(mode="r",encoding="utf8") as reader:
+            for line in reader:
                 json_line = json.loads(line)
                 datasets.append(json_line)
                 # tokens = line['text']
@@ -185,3 +180,26 @@ class BaseDataset(Dataset):
 
     def __len__(self):
         return len(self.dataset)
+
+
+class TokenClassificationDataset(BaseDataset, ABC):
+    """
+    用于字符分类任务的Dataset
+    """
+
+    def _convert_to_dataset(self, data_df):
+
+        dataset = []
+
+        data_df['text'] = data_df['text'].apply(lambda x: x.strip())
+        if not self.is_test:
+            data_df['label'] = data_df['label'].apply(lambda x: eval(x) if type(x) == str else x)
+
+        feature_names = list(data_df.columns)
+        for index_, row_ in enumerate(data_df.itertuples()):
+            dataset.append({
+                feature_name_: getattr(row_, feature_name_)
+                for feature_name_ in feature_names
+            })
+
+        return dataset
