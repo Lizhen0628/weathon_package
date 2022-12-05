@@ -12,10 +12,20 @@ import logging
 import numpy as np
 from transformers import AutoModel, AutoTokenizer, BertTokenizer
 
+from weathon.utils import FileUtils
+
 logger = logging.getLogger(__name__)
 
 
 class TransformerUtils:
+    @staticmethod
+    def recover_bert_token(token: str) -> str:
+        """获取token的“词干”（如果是##开头，则自动去掉##）
+        """
+        if token[:2] == '##':
+            return token[2:]
+        else:
+            return token
 
     @staticmethod
     def download_from_huggingface(model_name, root_path):
@@ -26,6 +36,7 @@ class TransformerUtils:
             TransformerUtils.download_from_huggingface('clue/albert_chinese_small','/data/lizhen/pretrained_models')
         """
         path = os.path.join(root_path, model_name)
+        FileUtils.ensure_dir(path)
         try:
             tokenizer = AutoTokenizer.from_pretrained(model_name)
         except Exception as e:

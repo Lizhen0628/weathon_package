@@ -15,9 +15,12 @@ from typing import Union, List
 from collections import defaultdict
 from torch.utils.data import Dataset
 from pandas.core.frame import DataFrame
+from weathon.utils import FileUtils
 
 
 # TODO:dataset split
+
+
 class BaseDataset(Dataset):
     """
     Dataset基类
@@ -88,14 +91,10 @@ class BaseDataset(Dataset):
             data_path (:obj:`string`): 数据地址
         """  # noqa: ignore flake8"
 
-
         if data_path.suffix == '.csv':
             data_df = pd.read_csv(data_path, dtype={'label': str})
-        elif data_path.suffix == '.json':
-            try:
-                data_df = pd.read_json(data_path, dtype={'label': str})
-            except ValueError:
-                data_df = self.read_line_json(data_path)
+        elif data_path.suffix == '.json' or data_path.suffix == '.jsonl':
+            data_df = FileUtils.read_json(data_path)
         elif data_path.suffix == '.tsv':
             data_df = pd.read_csv(data_path, sep='\t', dtype={'label': str})
         elif data_path.suffix == '.txt':
@@ -105,7 +104,7 @@ class BaseDataset(Dataset):
 
         return data_df
 
-    def read_line_json(self, data_path:Path):
+    def read_line_json(self, data_path: Path):
         """
         读取所需数据
 
@@ -115,7 +114,7 @@ class BaseDataset(Dataset):
         """
         datasets = []
 
-        with data_path.open(mode="r",encoding="utf8") as reader:
+        with data_path.open(mode="r", encoding="utf8") as reader:
             for line in reader:
                 json_line = json.loads(line)
                 datasets.append(json_line)
@@ -185,6 +184,11 @@ class BaseDataset(Dataset):
 class TokenClassificationDataset(BaseDataset, ABC):
     """
     用于字符分类任务的Dataset
+
+    # pandas dataframe的columns必选包含"text"和"label"
+    # text列为文本
+    # label列为列表形式，列表中每个元素是如下组织的字典
+    # {'start_idx': 实体首字符在文本的位置, 'end_idx': 实体尾字符在文本的位置, 'type': 实体类型标签, 'entity': 实体}
     """
 
     def _convert_to_dataset(self, data_df):

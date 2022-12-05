@@ -7,6 +7,7 @@
 
 
 import torch
+from abc import ABC
 from torch import nn
 from torch import Tensor
 from typing import Union
@@ -14,7 +15,7 @@ from pathlib import Path
 from transformers import BertPreTrainedModel, AutoModel, AutoConfig, BertConfig, BertModel
 
 
-class Bert(BertPreTrainedModel):
+class Bert(BertPreTrainedModel,ABC):
     """
     原始的BERT模型
 
@@ -113,7 +114,7 @@ class Bert(BertPreTrainedModel):
         return out
 
 
-class BertForSequenceClassification(Bert):
+class BertForSequenceClassification(Bert, ABC):
 
     def __init__(self, transformer_model_name: str, num_labels: int, encoder_trained=True, pooling='cls_with_pooler'):
         super(BertForSequenceClassification, self).__init__(transformer_model_name=transformer_model_name,
@@ -122,7 +123,7 @@ class BertForSequenceClassification(Bert):
         self.task = 'SequenceLevel'
 
 
-class BertForTokenClassification(Bert):
+class BertForTokenClassification(Bert, ABC):
     """
     基于BERT的命名实体模型
 
@@ -131,7 +132,7 @@ class BertForTokenClassification(Bert):
             模型的配置对象
         encoder_trained (:obj:`bool`, optional, defaults to True):
             bert参数是否可训练，默认可训练
-
+            
     Reference:
         [1] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding  
     """  # noqa: ignore flake8"

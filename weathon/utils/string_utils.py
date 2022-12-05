@@ -8,13 +8,11 @@
 import os
 import pypinyin
 import regex as re
+import unicodedata
 from typing import List, Union
 from weathon.utils.char_utils import CharUtils
 from weathon.utils.dictionary import Dictionary
 from weathon.utils.string_converter import ConvertMap, Converter
-
-
-
 
 
 def add_curr_dir(name):
@@ -22,7 +20,6 @@ def add_curr_dir(name):
 
 
 class StringUtils:
-
     CNPuncs_rule = re.compile("[。，！？、；：“”‘’（）【】\{\}『』「」〔〕——……—\-～·《》〈〉﹏___\.]")
     ENPuncs_rule = re.compile(
         "[,\.\":\)\(\-!\?\|;'\$&/\[\]>%=#\*\+\\•~@£·_\{\}©\^®`<→°€™›♥←×§″′Â█½à…“★”–●â►−¢²¬░¶↑±¿▾═¦║―¥▓—‹─▒：¼⊕▼▪†■’▀¨▄♫☆é¯♦¤▲è¸¾Ã⋅‘∞∙）↓、│（»，♪╩╚³・╦╣╔╗▬❤ïØ¹≤‡√]")
@@ -55,6 +52,18 @@ class StringUtils:
     def is_eng_string(string: str) -> bool:
         """判断字符串是否全为英文"""
         return all(CharUtils.is_alphabet(c) for c in string)
+
+    @staticmethod
+    def is_control(ch: str) -> bool:
+        """控制类字符判断
+        """
+        return unicodedata.category(ch) in ('Cc', 'Cf')
+
+    @staticmethod
+    def is_special(ch: str) -> bool:
+        """判断是不是有特殊含义的符号
+        """
+        return bool(ch) and (ch[0] == '[') and (ch[-1] == ']')
 
     @staticmethod
     def escape_re_character(s: str) -> str:
@@ -152,8 +161,8 @@ class StringUtils:
     @staticmethod
     def remove_string_punc(s: str) -> str:
         """去除字符串中的标点符号"""
-        s = CNPuncs_rule.sub("", s)
-        s = ENPuncs_rule.sub("", s)
+        s = StringUtils.CNPuncs_rule.sub("", s)
+        s = StringUtils.ENPuncs_rule.sub("", s)
         return s
 
 

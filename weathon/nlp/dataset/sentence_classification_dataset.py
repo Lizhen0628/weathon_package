@@ -9,7 +9,7 @@ import copy
 import numpy as np
 from typing import List, Dict
 from weathon.nlp.base import BaseDataset
-from weathon.nlp.processor.tokenizer import SentenceTokenizer
+from weathon.nlp.processor.tokenizer import TransfomerTokenizer
 
 
 class SentenceClassificationDataset(BaseDataset):
@@ -34,7 +34,7 @@ class SentenceClassificationDataset(BaseDataset):
 
         return dataset
 
-    def _convert_to_transfomer_ids(self, bert_tokenizer: SentenceTokenizer):
+    def _convert_to_transfomer_ids(self, bert_tokenizer: TransfomerTokenizer):
 
         features = []
         for (index_, row_) in enumerate(self.dataset):

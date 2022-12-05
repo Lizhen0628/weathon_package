@@ -15,6 +15,7 @@ import tarfile
 from pathlib import Path
 from typing import Union, List, Generator, Dict
 from zipfile import ZipFile
+import pandas as pd
 from collections import OrderedDict
 
 
@@ -24,30 +25,50 @@ class FileUtils:
     """
 
     @staticmethod
-    def read_json(infile, encoding='utf8'):
-        """
-            读取json文件
-        Args:
-            infile: json 文件路径
-            encoding: 文件编码格式
-        Returns:加载json文件后的dict
-
-        """
-        infile = Path(infile)
-        with infile.open('rt', encoding=encoding) as handle:
-            return json.load(handle, object_hook=OrderedDict)
-
-    @staticmethod
-    def read_jsonl_list(file_path: Union[str, Path], encoding: str = 'utf-8', fields: List[str] = None,
-                        dropna: bool = True) -> List[Dict]:
+    def read_json(file_path: Union[Path, str],
+                  return_type: str = 'DataFrame',  # [pandas.DataFrame, List, Generator]
+                  fields: List[str] = None,
+                  dropna: bool = True,
+                  encoding: str = 'utf8'
+                  ) -> Union[pd.DataFrame, List, Generator]:
         """
         读取jsonl文件，并以列表的形式返回
         Args:
             file_path: jsonl 文件路径
-            encoding: jsonl文件编码格式
+            return_type: 读取json文件返回的数据类型
             fields: 需要从json文件取出的键
             dropna: 如果键值不存在是否丢弃该数据
+            encoding: jsonl文件编码格式
+        Returns:以列表的形式返回读取内容
+        """
+        assert file_path.suffix == '.json' or file_path.suffix == '.jsonl', "file suffix should be .json or .jsonl"
 
+        if return_type == "DataFrame":
+            try:
+                return pd.read_json(file_path)
+            except ValueError:
+                return pd.DataFrame(FileUtils.read_jsonl_as_list(file_path, fields, dropna, encoding))
+
+        elif return_type == "List":
+            return FileUtils.read_jsonl_as_list(file_path, fields, dropna, encoding)
+        elif return_type == "Generator":
+            return FileUtils.read_jsonl_as_generator(file_path, fields, dropna, encoding)
+        else:
+            raise ValueError("return_type must in [DataFrame, List, Generator]")
+
+    @staticmethod
+    def read_jsonl_as_list(file_path: Union[str, Path],
+                           fields: List[str] = None,
+                           dropna: bool = True,
+                           encoding: str = 'utf-8'
+                           ) -> List[Dict]:
+        """
+        读取jsonl文件，并以列表的形式返回
+        Args:
+            file_path: jsonl 文件路径
+            fields: 需要从json文件取出的键
+            dropna: 如果键值不存在是否丢弃该数据
+            encoding: jsonl文件编码格式
         Returns:以列表的形式返回读取内容
 
         """
@@ -75,8 +96,12 @@ class FileUtils:
         return datas
 
     @staticmethod
-    def read_jsonl_generator(file_path: Union[str, Path], encoding: str = 'utf-8', fields: List[str] = None,
-                             dropna: bool = True) -> Generator:
+    def read_jsonl_as_generator(
+            file_path: Union[str, Path],
+            fields: List[str] = None,
+            dropna: bool = True,
+            encoding: str = 'utf-8'
+    ) -> Generator:
         """
 
         读取jsonl文件，并以列表的形式返回
@@ -125,7 +150,7 @@ class FileUtils:
             return yaml.load(handle, Loader=yaml.Loader)
 
     @staticmethod
-    def write_yaml( content, infile):
+    def write_yaml(content, infile):
         """
         将文件内容写入yaml文件
         Args:
@@ -139,7 +164,7 @@ class FileUtils:
             yaml.dump(content, handle, )
 
     @staticmethod
-    def write_json( content, infile):
+    def write_json(content, infile: Union[Path, str]):
         infile = Path(infile)
         with infile.open('wt') as handle:
             json.dump(content, handle, indent=4, sort_keys=False)

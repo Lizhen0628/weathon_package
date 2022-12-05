@@ -2,7 +2,7 @@ import dgl
 
 from weathon.nlp.base import BaseTokenizer, BaseVocab
 from transformers import BertTokenizer, AutoTokenizer
-from typing import Union, List, Set, Tuple
+from typing import Union, List, Tuple
 
 
 class TextLevelGCNTokenizer(BaseTokenizer):

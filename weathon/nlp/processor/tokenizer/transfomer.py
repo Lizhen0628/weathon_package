@@ -1,12 +1,14 @@
 import warnings
-import unicodedata
+
 import transformers
 import numpy as np
-
+import unicodedata
 from typing import List, Union, Tuple
 from copy import deepcopy
 from weathon.nlp.base import BaseVocab, BaseTokenizer
+from weathon.utils import StringUtils, TransformerUtils
 from transformers import BertTokenizer, AutoTokenizer
+from huggingface_hub.utils._validators import HFValidationError
 
 
 class TransfomerTokenizer(BaseTokenizer):
@@ -19,39 +21,18 @@ class TransfomerTokenizer(BaseTokenizer):
     """  # noqa: ignore flake8"
     tokenizer_type = 'transformer'
 
-    def __init__(self, vocab: Union[BertTokenizer, AutoTokenizer, BaseVocab], max_seq_len: int):
+    def __init__(self, vocab: Union[BaseVocab, str], max_seq_len: int):
         super().__init__(vocab, max_seq_len)
         if isinstance(vocab, str):
             # TODO: 改成由自定义的字典所决定
-            try:
-                vocab = AutoTokenizer.from_pretrained(vocab)
-            except ValueError:
+            if vocab in ["clue/albert_chinese_tiny"]:
                 vocab = BertTokenizer.from_pretrained(vocab)
+            else:
+                vocab = AutoTokenizer.from_pretrained(vocab)
 
         self.vocab = vocab
         self.max_seq_len = max_seq_len
         self.additional_special_tokens = set()
-
-    @staticmethod
-    def _is_control(ch: str) -> bool:
-        """控制类字符判断
-        """
-        return unicodedata.category(ch) in ('Cc', 'Cf')
-
-    @staticmethod
-    def _is_special(ch: str) -> bool:
-        """判断是不是有特殊含义的符号
-        """
-        return bool(ch) and (ch[0] == '[') and (ch[-1] == ']')
-
-    @staticmethod
-    def recover_bert_token(token: str) -> str:
-        """获取token的“词干”（如果是##开头，则自动去掉##）
-        """
-        if token[:2] == '##':
-            return token[2:]
-        else:
-            return token
 
     def get_token_mapping(self, text, tokens, is_mapping_index=True) -> List[str]:
         """给出原始的text和tokenize后的tokens的映射关系"""
@@ -64,7 +45,7 @@ class TransfomerTokenizer(BaseTokenizer):
             ch = ''.join([c for c in ch if unicodedata.category(c) != 'Mn'])
             ch = ''.join([
                 c for c in ch
-                if not (ord(c) == 0 or ord(c) == 0xfffd or self._is_control(c))
+                if not (ord(c) == 0 or ord(c) == 0xfffd or StringUtils.is_control(c))
             ])
             normalized_text += ch
             char_mapping.extend([i] * len(ch))
@@ -78,11 +59,10 @@ class TransfomerTokenizer(BaseTokenizer):
                 else:
                     token_mapping.append(raw_text[offset:offset + 1])
                 offset = offset + 1
-            elif self._is_special(token):
-                # 如果是[CLS]或者是[SEP]之类的词，则没有对应的映射
+            elif StringUtils.is_special(token):  # 如果是[CLS]或者是[SEP]之类的词，则没有对应的映射
                 token_mapping.append([])
             else:
-                token = self.recover_bert_token(token)
+                token = TransformerUtils.recover_bert_token(token)
                 start = text[offset:].index(token) + offset
                 end = start + len(token)
                 if is_mapping_index:
@@ -93,12 +73,15 @@ class TransfomerTokenizer(BaseTokenizer):
 
         return token_mapping
 
-    def sequence_to_ids(self, sequence_a: Union[str, List[str]], sequence_b: Union[str, List[str]] = None,
+    def sequence_to_ids(self,
+                        sequence_a: Union[str, List[str]],
+                        sequence_b: Union[str, List[str]] = None,
                         **kwargs) -> Tuple:
-        return self.pair_to_ids(sequence_a, sequence_b, **kwargs) if sequence_b else self.sentence_to_ids(sequence_a,
+
+        return self.pair_to_ids(sequence_a, sequence_b, **kwargs) if sequence_b else self.single_to_ids(sequence_a,
                                                                                                           **kwargs)
 
-    def sentence_to_ids(self, sequence: Union[str, List[str]], return_sequence_length: bool = False) -> Tuple[
+    def single_to_ids(self, sequence: Union[str, List[str]], return_sequence_length: bool = False) -> Tuple[
         np.ndarray, np.ndarray, np.ndarray]:
         if type(sequence) == str:
             sequence = self.tokenize(sequence)
@@ -179,35 +162,9 @@ class TransfomerTokenizer(BaseTokenizer):
             sequence, sequence_mask, segment_ids)
 
 
-class SentenceTokenizer(TransfomerTokenizer):
-    """
-    单句分词器
-    Args:
-        vocab: transformers词典类对象、词典地址或词典名，用于实现文本分词和ID化
-        max_seq_len (:obj:`int`): 预设的文本最大长度
-    """  # noqa: ignore flake8"
-
-    def sequence_to_ids(self, sequence_a: Union[str, List[str]], sequence_b: Union[str, List[str]] = None,
-                        **kwargs) -> Tuple:
-        return self.sentence_to_ids(sequence_a, **kwargs)
-
-
-class PairTokenizer(TransfomerTokenizer):
-    """
-    句子对分词器
-    Args:
-        vocab: transformers词典类对象、词典地址或词典名，用于实现文本分词和ID化
-        max_seq_len (:obj:`int`): 预设的文本最大长度
-    """  # noqa: ignore flake8"
-
-    def sequence_to_ids(self, sequence_a: Union[str, List[str]], sequence_b: Union[str, List[str]] = None,
-                        **kwargs) -> Tuple:
-        return self.pair_to_ids(sequence_a, sequence_b, **kwargs)
-
-
 class TokenTokenizer(TransfomerTokenizer):
     """
-    字符分词器，不
+    字符级别分词器
     Args:
         vocab: transformers词典类对象、词典地址或词典名，用于实现文本分词和ID化
         max_seq_len (:obj:`int`): 预设的文本最大长度
@@ -268,7 +225,11 @@ class PromptMLMTransformerTokenizer(TransfomerTokenizer):
         max_seq_len (int): 预设的文本最大长度
     """
 
-    def sequence_to_ids(self, sequence, prompt, prompt_mode='postfix', **kwargs):
+    def sequence_to_ids(self,
+                        sequence,
+                        prompt,
+                        prompt_mode='postfix',
+                        **kwargs):
         """
         将序列ID化
         Args:
@@ -326,7 +287,7 @@ class ErnieCtmTokenizer(TransfomerTokenizer):
 
     def __init__(self, vocab: Union[BertTokenizer, AutoTokenizer, BaseVocab], max_seq_len: int, cls_num: int = 2):
 
-        super().__init__(vocab, max_seq_len, max_seq_len)
+        super().__init__(vocab, max_seq_len)
         self.additional_special_tokens = set()
 
         self.cls_num = cls_num
@@ -335,7 +296,10 @@ class ErnieCtmTokenizer(TransfomerTokenizer):
         self.do_lower_case = self.vocab.do_lower_case
         self.vocab._tokenize = self._tokenize
 
-    def sentence_to_ids(self, sequence: Union[str, List[str]]) -> Tuple[np.ndarray, np.ndarray, np.ndarray, int]:
+    def single_to_ids(self,
+                        sequence: Union[str, List[str]],
+                        return_sequence_length: bool = False
+                        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, int]:
         if type(sequence) == str:
             sequence = self.tokenize(sequence)
 
@@ -363,8 +327,12 @@ class ErnieCtmTokenizer(TransfomerTokenizer):
 
         return sequence, sequence_mask, segment_ids, len(sequence)
 
-    def pair_to_ids(self, sequence_a: Union[str, List[str]], sequence_b: Union[str, List[str]],
-                    truncation_method: str = 'average') -> Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]:
+    def pair_to_ids(self,
+                    sequence_a: Union[str, List[str]],
+                    sequence_b: Union[str, List[str]],
+                    truncation_method: str = 'average',
+                    return_sequence_length: bool = False
+                    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Tuple[int, int]]:
         if type(sequence_a) == str:
             sequence_a = self.tokenize(sequence_a)
         if type(sequence_b) == str:

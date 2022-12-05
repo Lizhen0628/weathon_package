@@ -2,7 +2,6 @@ from weathon.nlp.dataset import BIONERDataset as Dataset
 from weathon.nlp.dataset import BIONERDataset as CrfBertNERDataset
 
 from weathon.nlp.processor.tokenizer import TokenTokenizer as Tokenizer
-from weathon.nlp.processor.tokenizer import TokenTokenizer as CrfBertNERTokenizer
 
 from weathon.nlp.nn import BertConfig as CrfBertConfig
 from weathon.nlp.nn import BertConfig as ModuleConfig

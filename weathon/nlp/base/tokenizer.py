@@ -37,5 +37,5 @@ class BaseTokenizer(ABC):
         return seq
 
     @abstractmethod
-    def sequence_to_ids(self,sequence, reverse=False, padding="post", truncating="post"):
+    def sequence_to_ids(self,sequence, reverse=False, padding="post", truncating="post",**kwargs):
         raise NotImplementedError("sequence_to_ids not implement")
