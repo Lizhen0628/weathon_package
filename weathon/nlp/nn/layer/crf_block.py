@@ -1,6 +1,5 @@
 # From: https://github.com/lonePatient/BERT-NER-Pytorch/blob/master/models/layers/crf.py
 
-
 import torch
 import torch.nn as nn
 
