@@ -12,16 +12,17 @@ from torch import nn
 from torch import Tensor
 from typing import Union
 from pathlib import Path
+from weathon.nlp.base import BaseModel
 from transformers import BertPreTrainedModel, AutoModel, AutoConfig, BertConfig, BertModel
 
 
-class Bert(BertPreTrainedModel,ABC):
+class Bert(BaseModel, BertPreTrainedModel, ABC):
     """
     原始的BERT模型
 
     Args:
-        config:
-            模型的配置对象
+        transformer_model_name: transformers 模型名称 或 模型路径
+        num_labels: 标签数量
         encoder_trained (:obj:`bool`, optional, defaults to True):
             bert参数是否可训练，默认可训练
         pooling (:obj:`str`, optional, defaults to "cls"):
@@ -39,17 +40,13 @@ class Bert(BertPreTrainedModel,ABC):
             encoder_trained=True,
             pooling='cls_with_pooler'
     ):
-
-        try:
-            config = AutoConfig.from_pretrained(transformer_model_name, num_labels=num_labels)
-        except ValueError:
-            config = BertConfig.from_pretrained(transformer_model_name, num_labels=num_labels)
-
+        config = BertConfig.from_pretrained(transformer_model_name,
+                                            num_labels=num_labels) if 'albert' in transformer_model_name.lower() else AutoConfig.from_pretrained(
+            transformer_model_name, num_labels=num_labels)
         super(Bert, self).__init__(config)
-        try:
-            self.bert = AutoModel.from_pretrained(config.name_or_path, config=config)
-        except ValueError:
-            self.bert = BertModel(config)
+
+        self.bert = BertModel(config) if 'albert' in transformer_model_name.lower() else AutoModel.from_pretrained(
+            config=config)
 
         self.pooling = pooling
 

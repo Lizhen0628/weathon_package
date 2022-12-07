@@ -15,9 +15,10 @@ class CrfBert(BertForTokenClassification):
 
     def __init__(
             self,
-            config,
+            transformer_model_name: str,
+            num_labels: int,
             encoder_trained=True
     ):
-        super(CrfBert, self).__init__(config, encoder_trained)
+        super(CrfBert, self).__init__(transformer_model_name, num_labels, encoder_trained)
 
-        self.crf = CRF(num_tags=config.num_labels, batch_first=True)
+        self.crf = CRF(num_tags=num_labels, batch_first=True)

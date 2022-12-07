@@ -9,11 +9,12 @@
 import torch
 import time
 import numpy as np
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Union
 
 
-class BaseModel(torch.nn.Module):
+class BaseModel(torch.nn.Module, ABC):
     """
     封装了nn.Module，主要是提供了save和load两个方法
 
@@ -44,6 +45,10 @@ class BaseModel(torch.nn.Module):
         model_parameters = filter(lambda p: p.requires_grad, self.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         return super().__str__() + '\nTrainable parameters: {}'.format(params)
+
+    @abstractmethod
+    def forward(self, *inputs):
+        raise NotImplementedError("forward not implemented!")
 
 
 class Flat(torch.nn.Module):
