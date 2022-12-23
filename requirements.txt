@@ -11,3 +11,5 @@ ipywidgets==8.0.2
 pyyaml==6.0
 tqdm==4.64.1
 seqeval==1.2.2
+pdfplumber==0.7.6
+pdf2docx==0.5.6

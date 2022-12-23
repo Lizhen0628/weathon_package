@@ -25,7 +25,7 @@ class PromptMLMTask(SequenceClassificationTask):
 
         return loss
 
-    def _on_evaluate_begin_record(self, **kwargs):
+    def _evaluate_begin_record(self, **kwargs):
         self.evaluate_logs['eval_loss'] = 0
         self.evaluate_logs['eval_acc'] = 0
         self.evaluate_logs['eval_step'] = 0
@@ -34,7 +34,7 @@ class PromptMLMTask(SequenceClassificationTask):
         self.evaluate_logs['labels'] = []
         self.evaluate_logs['logits'] = []
 
-    def _on_evaluate_step_end(self, inputs, outputs, **kwargs):
+    def _evaluate_step_end(self, inputs, outputs, **kwargs):
 
         with torch.no_grad():
             # compute loss

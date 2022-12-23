@@ -2,6 +2,9 @@ from pathlib import Path
 from weathon.nlp.dataset import BIONERDataset as Dataset
 from weathon.nlp.processor.tokenizer import TokenTokenizer as Tokenizer
 from weathon.nlp.model.ner.crf_bert import CrfBert as Model
+from weathon.nlp.task.named_entity_recognition import CRFNERTask as Task
+from weathon.utils import OptimizerUtils
+from transformers import AutoConfig
 
 
 def main(transformer_model):
@@ -19,10 +22,17 @@ def main(transformer_model):
     ner_dev_dataset.convert_to_ids(tokenizer)
 
     # 加载预训练模型
-    dl_module = Model().from_pretrained()
+    config = AutoConfig.from_pretrained(transformer_model, num_labels=len(ner_train_dataset.cat2id))
+    dl_module = Model.from_pretrained(transformer_model, config=config)
+
+    optimizer = OptimizerUtils.get_default_optimizer(dl_module, "crf_bert", lr=1e-3, crf_lr=2e-3)
+
+    task = Task(dl_module, optimizer, 'ce')
+
+    task.fit(ner_train_dataset, ner_dev_dataset, lr=2e-3, epochs=2, batch_size=16)
 
     print(dl_module)
 
+
 if __name__ == '__main__':
-    transformer_model = "clue/albert_chinese_tiny"
-    main(transformer_model)
+    main(transformer_model="clue/albert_chinese_tiny")

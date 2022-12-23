@@ -111,7 +111,7 @@ class CasRelRETask(SequenceClassificationTask):
     ):
         self.logs = dict()
 
-        train_generator = self._on_train_begin(
+        train_generator = self._train_begin(
             train_data,
             validation_data,
             batch_size,
@@ -123,7 +123,7 @@ class CasRelRETask(SequenceClassificationTask):
 
         for epoch in range(epochs):
 
-            train_data_prefetcher, inputs = self._on_epoch_begin(
+            train_data_prefetcher, inputs = self._epoch_begin(
                 train_generator,
                 **kwargs
             )
@@ -132,7 +132,7 @@ class CasRelRETask(SequenceClassificationTask):
 
             while inputs is not None:
 
-                self._on_step_begin(epoch, step, inputs, **kwargs)
+                self._step_begin(epoch, step, inputs, **kwargs)
 
                 inputs = self._get_module_inputs_on_train(inputs, **kwargs)
 
@@ -142,26 +142,26 @@ class CasRelRETask(SequenceClassificationTask):
                 # 计算损失
                 logits, loss = self._get_train_loss(inputs, outputs, **kwargs)
 
-                loss = self._on_backward(inputs, outputs, logits, loss, **kwargs)
+                loss = self._loss_backward(inputs, outputs, logits, loss, **kwargs)
 
                 # optimize
                 if (step + 1) % gradient_accumulation_steps == 0:
                     # optimize
-                    self._on_optimize(inputs, outputs, logits, loss, **kwargs)
+                    self._optimize_step(inputs, outputs, logits, loss, **kwargs)
 
                 # setp evaluate
-                self._on_step_end(step, inputs, outputs, logits, loss, **kwargs)
+                self._step_end(step, inputs, outputs, logits, loss, **kwargs)
 
                 step += 1
 
                 inputs = train_data_prefetcher.next()
 
-            self._on_epoch_end(epoch, **kwargs)
+            self._epoch_end(epoch, **kwargs)
 
             if validation_data is not None:
                 self.evaluate(validation_data, **kwargs)
 
-    def _on_epoch_begin(self, train_generator, **kwargs):
+    def _epoch_begin(self, train_generator, **kwargs):
 
         train_data_prefetcher = DataPreFetcher(
             train_generator,
@@ -171,7 +171,7 @@ class CasRelRETask(SequenceClassificationTask):
 
         self.model.train()
 
-        self._on_epoch_begin_record(**kwargs)
+        self._epoch_begin_record(**kwargs)
 
         return train_data_prefetcher, inputs
 
@@ -217,7 +217,7 @@ class CasRelRETask(SequenceClassificationTask):
     ):
         self.evaluate_logs = dict()
 
-        evaluate_generator = self._on_evaluate_begin(
+        evaluate_generator = self._evaluate_begin(
             validation_data,
             evaluate_batch_size,
             shuffle=False,
@@ -322,7 +322,7 @@ class CasRelRETask(SequenceClassificationTask):
 
         return precision, recall, f1_score
 
-    def _on_evaluate_begin(
+    def _evaluate_begin(
             self,
             validation_data,
             batch_size,
@@ -341,11 +341,11 @@ class CasRelRETask(SequenceClassificationTask):
 
         self.model.eval()
 
-        self._on_evaluate_begin_record(**kwargs)
+        self._evaluate_begin_record(**kwargs)
 
         return evaluate_generator
 
-    def _on_evaluate_begin_record(self, **kwargs):
+    def _evaluate_begin_record(self, **kwargs):
 
         self.evaluate_logs['correct_num'] = 0
         self.evaluate_logs['predict_num'] = 0

@@ -5,6 +5,7 @@ from weathon.utils.file_utils import FileUtils  # 文件工具类
 from weathon.utils.file_utils import FileDecomposeUtils  # 文件解压缩工具类
 from weathon.utils.union_find import UnionFind  # 并查集
 from weathon.utils.ip_utils import IpUtils  # IP相关操作工具类
+from weathon.utils.email_utils import EmailUtils  # 邮件相关操作工具类：发邮件
 
 # --------------------------------------------- string ---------------------------------------------
 from weathon.utils.aho_corasick import AhoCorasick  # AC自动机:多模式匹配中的经典算法

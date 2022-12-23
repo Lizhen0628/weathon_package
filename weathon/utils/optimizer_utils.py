@@ -94,9 +94,7 @@ class OptimizerUtils:
             {'params': [p for n, p in linear_param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0,
              'lr': crf_lr}
         ]
-        optimizer = all_optimizers_dict['adamw'](optimizer_grouped_parameters,
-                                                 eps=eps,
-                                                 correct_bias=correct_bias)
+        optimizer = all_optimizers_dict['adamw'](optimizer_grouped_parameters)
 
         return optimizer
 

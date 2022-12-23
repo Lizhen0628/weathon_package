@@ -11,11 +11,6 @@ class CrfBert(BertForTokenClassification):
         bert_trained (:obj:`bool`, optional): 预训练模型的参数是否可训练
     """  # noqa: ignore flake8"
 
-    def __init__(
-        self,
-        config,
-        encoder_trained=True
-    ):
+    def __init__(self, config, encoder_trained=True):
         super(CrfBert, self).__init__(config, encoder_trained)
-
         self.crf = CRF(num_tags=config.num_labels, batch_first=True)

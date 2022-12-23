@@ -7,16 +7,12 @@
 
 
 import torch
-from abc import ABC
 from torch import nn
 from torch import Tensor
-from typing import Union
-from pathlib import Path
-from weathon.nlp.base import BaseModel
-from transformers import BertPreTrainedModel, AutoModel, AutoConfig, BertConfig, BertModel
+from transformers import BertPreTrainedModel, AutoModel, AutoConfig, BertConfig, BertModel, PretrainedConfig
 
 
-class Bert(BaseModel, BertPreTrainedModel, ABC):
+class Bert(BertPreTrainedModel):
     """
     原始的BERT模型
 
@@ -33,28 +29,15 @@ class Bert(BaseModel, BertPreTrainedModel, ABC):
         [1] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding  
     """  # noqa: ignore flake8"
 
-    def __init__(
-            self,
-            transformer_model_name: Union[str, Path],
-            num_labels: int,
-            encoder_trained=True,
-            pooling='cls_with_pooler'
-    ):
-        config = BertConfig.from_pretrained(transformer_model_name,
-                                            num_labels=num_labels) if 'albert' in transformer_model_name.lower() else AutoConfig.from_pretrained(
-            transformer_model_name, num_labels=num_labels)
+    def __init__(self, config: PretrainedConfig, encoder_trained=True, pooling='cls_with_pooler'):
         super(Bert, self).__init__(config)
-
-        self.bert = BertModel(config) if 'albert' in transformer_model_name.lower() else AutoModel.from_pretrained(
+        self.bert = BertModel(config) if 'albert' in config.name_or_path.lower() else AutoModel.from_pretrained(
             config=config)
-
         self.pooling = pooling
-
         for param in self.bert.parameters():
             param.requires_grad = encoder_trained
 
         self.num_labels = config.num_labels
-
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.classifier = nn.Linear(config.hidden_size, self.num_labels)
 
@@ -90,9 +73,9 @@ class Bert(BaseModel, BertPreTrainedModel, ABC):
         if self.task == 'SequenceLevel':
             return self.sequence_pooling(encoder_output, attention_mask, pooling)
         elif self.task == 'TokenLevel':
-            return encoder_output[-1]
+            return encoder_output['last_hidden_state']
         else:
-            return encoder_output[-1][:, 0, :]
+            return encoder_output.last_hidden_state[:, 0, :]
 
     def forward(
             self,
@@ -111,31 +94,22 @@ class Bert(BaseModel, BertPreTrainedModel, ABC):
         return out
 
 
-class BertForSequenceClassification(Bert, ABC):
+class BertForSequenceClassification(Bert):
 
-    def __init__(self, transformer_model_name: str, num_labels: int, encoder_trained=True, pooling='cls_with_pooler'):
-        super(BertForSequenceClassification, self).__init__(transformer_model_name=transformer_model_name,
-                                                            num_labels=num_labels, encoder_trained=encoder_trained,
-                                                            pooling=pooling)
+    def __init__(self, config: PretrainedConfig, encoder_trained: bool = True, pooling='cls_with_pooler'):
+        super(BertForSequenceClassification, self).__init__(config, encoder_trained=encoder_trained, pooling=pooling)
         self.task = 'SequenceLevel'
 
 
-class BertForTokenClassification(Bert, ABC):
+class BertForTokenClassification(Bert):
     """
-    基于BERT的命名实体模型
-
     Args:
-        config:
-            模型的配置对象
-        encoder_trained (:obj:`bool`, optional, defaults to True):
-            bert参数是否可训练，默认可训练
-            
+        config: 模型的配置对象
+        encoder_trained (:obj:`bool`, optional, defaults to True): bert参数是否可训练，默认可训练
     Reference:
         [1] BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding  
     """  # noqa: ignore flake8"
 
-    def __init__(self, transformer_model_name: str, num_labels: int, encoder_trained=True):
-        super(BertForTokenClassification, self).__init__(transformer_model_name=transformer_model_name,
-                                                         num_labels=num_labels, encoder_trained=encoder_trained)
-
+    def __init__(self, config: PretrainedConfig, encoder_trained: bool = True):
+        super(BertForTokenClassification, self).__init__(config, encoder_trained=encoder_trained)
         self.task = 'TokenLevel'

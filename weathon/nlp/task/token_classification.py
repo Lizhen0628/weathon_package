@@ -6,10 +6,10 @@
 # @Description:
 
 import torch
-from weathon.nlp.task.sequence_classification import SequenceClassificationTask
+from weathon.nlp.base import BaseTask
 
 
-class TokenClassificationTask(SequenceClassificationTask):
+class TokenClassificationTask(BaseTask):
     """
     字符分类任务的基类
 
@@ -27,7 +27,7 @@ class TokenClassificationTask(SequenceClassificationTask):
     """  # noqa: ignore flake8"
 
     def __init__(self, *args, **kwargs):
-        super(SequenceClassificationTask, self).__init__(*args, **kwargs)
+        super(TokenClassificationTask, self).__init__(*args, **kwargs)
         if hasattr(self.model, 'task') is False:
             self.model.task = 'TokenLevel'
 
@@ -51,7 +51,7 @@ class TokenClassificationTask(SequenceClassificationTask):
 
         return loss
 
-    def _on_evaluate_begin_record(self, **kwargs):
+    def _evaluate_begin_record(self, **kwargs):
         self.evaluate_logs['eval_loss'] = 0
         self.evaluate_logs['eval_step'] = 0
         self.evaluate_logs['eval_example'] = 0

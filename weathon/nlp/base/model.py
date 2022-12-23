@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Union
 
 
-class BaseModel(torch.nn.Module, ABC):
+class BaseModel(torch.nn.Module):
     """
     封装了nn.Module，主要是提供了save和load两个方法
 

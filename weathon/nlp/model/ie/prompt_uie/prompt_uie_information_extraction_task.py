@@ -73,9 +73,9 @@ class PromptUIETask(TokenClassificationTask):
             self.ema.store(self.model.parameters())
             self.ema.copy_to(self.model.parameters())
 
-        self._on_epoch_begin_record(**kwargs)
+        self._epoch_begin_record(**kwargs)
 
-    def _on_evaluate_step_end(self, inputs, logits, **kwargs):
+    def _evaluate_step_end(self, inputs, logits, **kwargs):
 
         with torch.no_grad():
             # compute loss

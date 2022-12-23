@@ -27,7 +27,7 @@ class TCTask(SequenceClassificationTask):
 
         super(TCTask, self).__init__(*args, **kwargs)
 
-    def _on_optimize_record(
+    def _optimize_record(
         self,
         inputs,
         outputs,
@@ -44,7 +44,7 @@ class TCTask(SequenceClassificationTask):
                 _, preds = torch.max(logits, 1)
                 self.logs['epoch_evaluation'] += torch.sum(preds == inputs['label_ids']).item() / len(inputs['label_ids'])
 
-    def _on_step_end(
+    def _step_end(
         self,
         step,
         inputs,
@@ -66,7 +66,7 @@ class TCTask(SequenceClassificationTask):
 
         self._on_step_end_record(**kwargs)
 
-    def _on_epoch_end(
+    def _epoch_end(
         self,
         epoch,
         verbose=True,
@@ -79,7 +79,7 @@ class TCTask(SequenceClassificationTask):
                 self.logs['epoch_loss'] / self.logs['epoch_step'],
                 self.logs['epoch_evaluation'] / self.logs['epoch_step']))
 
-    def _on_evaluate_begin_record(self, **kwargs):
+    def _evaluate_begin_record(self, **kwargs):
 
         self.evaluate_logs['eval_loss'] = 0
         self.evaluate_logs['eval_acc'] = 0
@@ -89,7 +89,7 @@ class TCTask(SequenceClassificationTask):
         self.evaluate_logs['labels'] = []
         self.evaluate_logs['logits'] = []
 
-    def _on_evaluate_step_end(self, inputs, outputs, **kwargs):
+    def _evaluate_step_end(self, inputs, outputs, **kwargs):
 
         with torch.no_grad():
             # compute loss

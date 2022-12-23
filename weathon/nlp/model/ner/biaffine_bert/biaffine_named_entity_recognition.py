@@ -42,7 +42,7 @@ class BiaffineNERTask(TokenClassificationTask):
 
         return loss
 
-    def _on_evaluate_step_end(self, inputs, outputs, **kwargs):
+    def _evaluate_step_end(self, inputs, outputs, **kwargs):
 
         with torch.no_grad():
             # compute loss

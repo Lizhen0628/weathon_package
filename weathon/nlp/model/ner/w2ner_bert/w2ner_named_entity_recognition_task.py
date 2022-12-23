@@ -185,7 +185,7 @@ class W2NERTask(TokenClassificationTask):
 
         return loss
 
-    def _on_evaluate_begin_record(self, **kwargs):
+    def _evaluate_begin_record(self, **kwargs):
 
         self.evaluate_logs['eval_loss'] = 0
         self.evaluate_logs['eval_step'] = 0
@@ -195,7 +195,7 @@ class W2NERTask(TokenClassificationTask):
         self.evaluate_logs['founds'] = []
         self.evaluate_logs['origins'] = []
 
-    def _on_evaluate_step_end(self, inputs, outputs, **kwargs):
+    def _evaluate_step_end(self, inputs, outputs, **kwargs):
 
         with torch.no_grad():
             # compute loss
