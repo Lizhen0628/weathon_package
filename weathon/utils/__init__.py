@@ -9,13 +9,13 @@ from weathon.utils.email_utils import EmailUtils                # 邮件相关�
 from weathon.utils.pdf_utils import PDFUtils                    # pdf 相关操作工具类
 
 # --------------------------------------------- string ---------------------------------------------
+from weathon.utils.dictionary import Dictionary  # 词库
+from weathon.utils.number_utils import NumberUtils  # 字符数值处理工具类
 from weathon.utils.aho_corasick import AhoCorasick  # AC自动机:多模式匹配中的经典算法
 from weathon.utils.minjoin import MinJoin  # 文本召回方案
 from weathon.utils.encrypt_utils import EncryptUtils  # 字符串加密工具类
 from weathon.utils.char_utils import CharUtils  # 字符处理
 from weathon.utils.string_utils import StringUtils  # 字符串处理工具类
-from weathon.utils.number_utils import NumberUtils  # 数值处理工具类
-from weathon.utils.dictionary import Dictionary  # 词库
 
 # --------------------------------------------- deep learning ---------------------------------------------
 # transformers 下载、权重转换相关

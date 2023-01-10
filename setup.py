@@ -140,3 +140,5 @@ setup(
         "pypinyin >= 0.47.1"
     ],
 )
+
+# python setup.py sdist upload
